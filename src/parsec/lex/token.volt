@@ -203,8 +203,10 @@ fn isPrimitiveTypeToken(token: TokenType) bool
 class Token
 {
 	loc: Location;
+	alias location = loc;
 	type: TokenType;
 	value: string;
+	bool isBackwardsComment;
 }
 
 /**

@@ -6,6 +6,7 @@ module parsec.lex.writer;
 
 import parsec.lex.token : Token, TokenType;
 import parsec.lex.source : Source;
+import parsec.lex.error;
 
 
 /**
@@ -13,6 +14,9 @@ import parsec.lex.source : Source;
  */
 final class TokenWriter
 {
+public:
+	LexerError[] errors;
+
 private:
 	mSource: Source;
 	mLength: size_t;
