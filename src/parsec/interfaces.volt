@@ -2,6 +2,7 @@
 // See copyright notice in src/volt/license.d (BOOST ver. 1.0).
 module parsec.interfaces;
 
+import watt.io;
 import core.exception;
 import parsec.lex.location;
 import ir = parsec.ir.ir;
@@ -19,6 +20,7 @@ import ir = parsec.ir.ir;
  */
 enum Platform
 {
+	Unknown,
 	MinGW,
 	MSVC,
 	Linux,
@@ -32,6 +34,7 @@ enum Platform
  */
 enum Arch
 {
+	Unknown,
 	X86,
 	X86_64,
 }
@@ -121,15 +124,16 @@ public:
 		}
 	}
 
-	/// Throws: Exception if ident is reserved.
-	final void setVersionIdentifier(string ident)
+	/// Returns: true if the version was set, false if reserved.
+	final bool setVersionIdentifier(string ident)
 	{
 		if (auto p = ident in mVersionIdentifiers) {
 			if (!(*p)) {
-				throw new Exception("cannot set reserved identifier.");
+				return false;
 			}
 		}
 		mVersionIdentifiers[ident] = true;
+		return true;
 	}
 
 	/// Doesn't throw on ident reserve.

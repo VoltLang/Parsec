@@ -543,7 +543,9 @@ ParseStatus parseNewFunctionType(ParserStream ps, out ir.CallableType func)
 			ps.resetErrors();
 		}
 	}
-	panicAssert(func, func.ret !is null);
+	if (func.ret is null) {
+		return parsePanic(ps, func.location, func.nodeType, "func ret is null");
+	}
 
 	if (parenRet && ps == TokenType.Comma) {
 		// TODO: Parse multiple return types here.

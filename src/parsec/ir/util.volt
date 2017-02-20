@@ -1416,8 +1416,6 @@ ir.StatementExp buildInternalArrayLiteralSmart(Location loc, ir.Type atype, ir.E
 		throw panic(atype, "must be array type");
 	}
 	auto arr = cast(ir.ArrayType) atype;
-	panicAssert(atype, arr !is null);
-
 	auto sexp = new ir.StatementExp();
 	sexp.location = loc;
 	auto var = buildVariableSmart(loc, copyTypeSmart(loc, atype), ir.Variable.Storage.Function, "array");
@@ -1440,8 +1438,6 @@ ir.StatementExp buildInternalStaticArrayLiteralSmart(Location loc, ir.Type atype
 		throw panic(atype, "must be staticarray type");
 	}
 	auto arr = cast(ir.StaticArrayType) atype;
-	panicAssert(atype, arr !is null);
-
 	auto sexp = new ir.StatementExp();
 	sexp.location = loc;
 	auto var = buildVariableSmart(loc, copyTypeSmart(loc, atype), ir.Variable.Storage.Function, "sarray");
@@ -1936,8 +1932,7 @@ void addStorageIgnoreNamed(ir.Type dest, ir.Type src)
 void addStorage(ir.Type dest, ir.Type src)
 {
 	auto named = cast(ir.Named) dest;
-	panicAssert(dest, named is null);
-	if (dest is null || src is null) {
+	if (dest is null || src is null || named is null) {
 		return;
 	}
 	if (!dest.isConst) dest.isConst = src.isConst;

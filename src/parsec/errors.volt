@@ -1007,6 +1007,7 @@ CompilerException panicExpected(ir.Location location, string msg, string file = 
 	return new CompilerPanic(location, format("expected %s.", msg), file, line);
 }
 
+/+
 void panicAssert(ir.Node node, bool condition, string file = __FILE__, const int line = __LINE__)
 {
 	if (!condition) {
@@ -1020,7 +1021,7 @@ void panicAssert(ir.Location location, bool condition, string file = __FILE__, c
 		throw panic(location, "assertion failure.", file, line);
 	}
 }
-
++/
 
 private:
 

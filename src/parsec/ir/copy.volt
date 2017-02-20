@@ -255,7 +255,6 @@ ir.FunctionType copy(ir.FunctionType old)
 	auto ft = new ir.FunctionType(old);
 	ft.location = old.location;
 	ft.ret = copyType(old.ret);
-	panicAssert(old, old.params.length == old.isArgRef.length && old.params.length == old.isArgOut.length);
 	ft.params = new ir.Type[](old.params.length);
 	ft.isArgOut = new bool[](old.isArgOut.length);
 	ft.isArgRef = new bool[](old.isArgRef.length);
@@ -272,7 +271,6 @@ ir.DelegateType copy(ir.DelegateType old)
 	auto dgt = new ir.DelegateType(old);
 	dgt.location = old.location;
 	dgt.ret = copyType(old.ret);
-	panicAssert(old, old.params.length == old.isArgRef.length && old.params.length == old.isArgOut.length);
 	dgt.params = new ir.Type[](old.params.length);
 	dgt.isArgOut = new bool[](old.isArgOut.length);
 	dgt.isArgRef = new bool[](old.isArgRef.length);
