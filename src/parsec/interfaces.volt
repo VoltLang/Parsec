@@ -47,6 +47,22 @@ class TargetInfo
 	Arch arch;
 	Platform platform;
 
+	this()
+	{
+		version (X86) {
+			arch = Arch.X86;
+		} else {
+			arch = Arch.X86_64;
+		}
+		version (Linux) {
+			platform = Platform.Linux;
+		} else version (OSX) {
+			platform = Platform.OSX;
+		} else version (MSVC) {
+			platform = Platform.MSVC;
+		}
+	}
+
 	bool isP64;
 	size_t ptrSize;
 
