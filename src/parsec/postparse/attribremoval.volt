@@ -148,9 +148,6 @@ public:
 	override Status leave(ir.Class c) { ctxPop(c); return Continue; }
 	override Status leave(ir._Interface i) { ctxPop(i); return Continue; }
 
-	override Status enter(ir.Attribute attr) { assert(false); }
-	override Status leave(ir.Attribute attr) { assert(false); }
-
 protected:
 	/*
 	 * Apply functions.
