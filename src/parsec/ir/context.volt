@@ -573,7 +573,7 @@ private:
 
 	void errorDefined(Node n, string name)
 	{
-		auto str = format("\"%s\" already defined", name);
-		throw panic(n.location, str);
+//		auto str = format("\"%s\" already defined", name);
+//		throw panic(n.location, str);
 	}
 }
