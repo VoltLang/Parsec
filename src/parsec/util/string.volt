@@ -124,8 +124,9 @@ immutable(void)[] unescapeString(Location location, const(char)[] s)
 					continue;
 				// @todo Named character entities. http://www.w3.org/TR/html5/named-character-references.html
 				default:
-					string str = format("valid escape, found '\\%s'", c);
-					throw makeExpected(location, str);
+					//string str = format("valid escape, found '\\%s'", c);
+					//throw makeExpected(location, str);
+					continue;
 			}
 			escaping = false;
 			continue;
@@ -139,6 +140,7 @@ immutable(void)[] unescapeString(Location location, const(char)[] s)
 		}
 	}
 
+/+
 	if (escaping) {
 		throw makeExpected(location, "valid escape");
 	}
@@ -147,7 +149,7 @@ immutable(void)[] unescapeString(Location location, const(char)[] s)
 		throw makeExpected(location, "valid unicode escape, \\uXXXX");
 	} else if (unicoding == 8) {
 		throw makeExpected(location, "valid unicode escape, \\UXXXXXXXX");
-	}
+	}+/
 
 	return cast(immutable(void)[]) output;
 }

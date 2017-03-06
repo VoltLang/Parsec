@@ -39,14 +39,15 @@ Token[] lex(Source source)
 		if (lexNext(tw))
 			continue;
 
-		assert(tw.errors.length > 0);
+/+
 		foreach (err; tw.errors) {
 			auto lpe = cast(LexerPanicError) err;
 			if (lpe !is null) {
 				throw lpe.panicException;
 			}
 		}
-		throw makeError(tw.errors[0].location, tw.errors[0].errorMessage());
+		break;+/
+		//throw makeError(tw.errors[0].location, tw.errors[0].errorMessage());
 	} while (tw.lastAdded.type != TokenType.End);
 
 	return tw.getTokens();

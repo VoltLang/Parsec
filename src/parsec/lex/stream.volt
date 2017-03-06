@@ -21,19 +21,9 @@ public:
 	/**
 	 * Takes the token array does some error checking and initializes
 	 * mTokens with it also sets the current token to the first token.
-	 *
-	 * Throws:
-	 *   CompilerPanic if token stream is not valid.
 	 */
 	this(Token[] tokens)
 	{
-		if (tokens.length < 3)
-			throw panic("Token stream too short");
-		if (tokens[0].type != TokenType.Begin)
-			throw panic("Token stream not started correctly");
-		if (tokens[$-1].type != TokenType.End)
-			throw panic("Token stream not terminated correctly");
-
 		this.mTokens = tokens;
 	}
 
@@ -136,7 +126,8 @@ public:
 	final Token lookbehind(size_t n)
 	{
 		if (n > mIndex)
-			throw panic("Token array access out of bounds");
+			return mTokens[0];
+			//throw panic("Token array access out of bounds");
 		return mTokens[mIndex - n];
 	}
 

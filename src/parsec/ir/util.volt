@@ -248,7 +248,8 @@ ir.Type copyTypeSmart(Location loc, ir.Type type)
 		outType = buildTypeReference(loc, type, s !is null ? s.name : null);
 		break;
 	default:
-		throw panicUnhandled(type, ir.nodeToString(type));
+		//throw panicUnhandled(type, ir.nodeToString(type));
+		return type;
 	}
 	addStorage(outType, type);
 	return outType;

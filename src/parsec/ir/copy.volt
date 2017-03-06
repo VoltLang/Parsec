@@ -416,9 +416,11 @@ ir.Type copyType(ir.Type t)
 	case Struct:
 	case Class:
 	case Enum:
-		throw panic(t.location, "can't copy aggregate types");
+		//throw panic(t.location, "can't copy aggregate types");
+		return t;
 	default:
-		throw panicUnhandled(t, ir.nodeToString(t));
+		//throw panicUnhandled(t, ir.nodeToString(t));
+		return t;
 	}
 	addStorage(newt, t);
 	return newt;
