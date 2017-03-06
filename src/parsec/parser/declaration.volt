@@ -1163,6 +1163,13 @@ ParseStatus parseEnumDeclaration(ParserStream ps, out ir.EnumDeclaration edecl)
 	}
 	edecl.name = nameTok.value;
 
+	if (matchIf(ps, TokenType.Colon)) {
+		succeeded = parseType(ps, out edecl.type);
+		if (!succeeded) {
+			parseFailed(ps, edecl);
+		}
+	}
+
 	if (matchIf(ps, TokenType.Assign)) {
 		succeeded = parseExp(ps, out edecl.assign);
 		if (!succeeded) {
