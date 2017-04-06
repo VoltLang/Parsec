@@ -16,8 +16,9 @@ import parsec.lex.token : TokenType;
 
 import parsec.parser.base;
 import parsec.parser.declaration;
-public import parsec.parser.statements : parseMixinStatement;
+public import parsec.parser.statements : parseMixinStatement, parseAssertStatement;
 import parsec.parser.expression;
+import parsec.parser.templates;
 
 
 ParseStatus parseModule(ParserStream ps, out ir.Module mod)
@@ -113,178 +114,214 @@ body
 	auto sink = new NodeSink();
 
 	switch (ps.peek.type) {
-		case TokenType.Import:
-			ir.Import _import;
-			succeeded = parseImport(ps, out _import);
+	case TokenType.Import:
+		ir.Import _import;
+		succeeded = parseImport(ps, out _import);
+		if (!succeeded) {
+			return parseFailed(ps, ir.NodeType.TopLevelBlock);
+		}
+		sink.push(_import);
+		break;
+	case TokenType.Unittest:
+		ir.Unittest u;
+		succeeded = parseUnittest(ps, out u);
+		if (!succeeded) {
+			return parseFailed(ps, ir.NodeType.TopLevelBlock);
+		}
+		sink.push(u);
+		break;
+	case TokenType.This:
+		ir.Function c;
+		succeeded = parseConstructor(ps, out c);
+		if (!succeeded) {
+			return parseFailed(ps, ir.NodeType.TopLevelBlock);
+		}
+		sink.push(c);
+		break;
+	case TokenType.Tilde:  // XXX: Is this unambiguous?
+		ir.Function d;
+		succeeded = parseDestructor(ps, out d);
+		if (!succeeded) {
+			return parseFailed(ps, ir.NodeType.TopLevelBlock);
+		}
+		sink.push(d);
+		break;
+	case TokenType.Union:
+		ir.Union u;
+		if (isTemplateDefinition(ps)) {
+			ir.TemplateDefinition td;
+			succeeded = parseTemplateDefinition(ps, out td);
 			if (!succeeded) {
 				return parseFailed(ps, ir.NodeType.TopLevelBlock);
 			}
-			sink.push(_import);
+			sink.push(td);
 			break;
-		case TokenType.Unittest:
-			ir.Unittest u;
-			succeeded = parseUnittest(ps, out u);
+		}
+		succeeded = parseUnion(ps, out u);
+		if (!succeeded) {
+			return parseFailed(ps, ir.NodeType.TopLevelBlock);
+		}
+		sink.push(u);
+		break;
+	case TokenType.Struct:
+		ir.Struct s;
+		if (isTemplateDefinition(ps)) {
+			ir.TemplateDefinition td;
+			succeeded = parseTemplateDefinition(ps, out td);
 			if (!succeeded) {
 				return parseFailed(ps, ir.NodeType.TopLevelBlock);
 			}
-			sink.push(u);
+			sink.push(td);
 			break;
-		case TokenType.This:
-			ir.Function c;
-			succeeded = parseConstructor(ps, out c);
+		}
+		succeeded = parseStruct(ps, out s);
+		if (!succeeded) {
+			return parseFailed(ps, ir.NodeType.TopLevelBlock);
+		}
+		sink.push(s);
+		break;
+	case TokenType.Class:
+		ir.Class c;
+		if (isTemplateDefinition(ps)) {
+			ir.TemplateDefinition td;
+			succeeded = parseTemplateDefinition(ps, out td);
 			if (!succeeded) {
 				return parseFailed(ps, ir.NodeType.TopLevelBlock);
 			}
-			sink.push(c);
+			sink.push(td);
 			break;
-		case TokenType.Tilde:  // XXX: Is this unambiguous?
-			ir.Function d;
-			succeeded = parseDestructor(ps, out d);
+		}
+		succeeded = parseClass(ps, out c);
+		if (!succeeded) {
+			return parseFailed(ps, ir.NodeType.TopLevelBlock);
+		}
+		sink.push(c);
+		break;
+	case TokenType.Interface:
+		ir._Interface i;
+		if (isTemplateDefinition(ps)) {
+			ir.TemplateDefinition td;
+			succeeded = parseTemplateDefinition(ps, out td);
 			if (!succeeded) {
 				return parseFailed(ps, ir.NodeType.TopLevelBlock);
 			}
-			sink.push(d);
+			sink.push(td);
 			break;
-		case TokenType.Union:
-			ir.Union u;
-			succeeded = parseUnion(ps, out u);
+		}
+		succeeded = parseInterface(ps, out i);
+		if (!succeeded) {
+			return parseFailed(ps, ir.NodeType.TopLevelBlock);
+		}
+		sink.push(i);
+		break;
+	case TokenType.Enum:
+		ir.Node[] nodes;
+		succeeded = parseEnum(ps, out nodes);
+		if (!succeeded) {
+			return parseFailed(ps, ir.NodeType.TopLevelBlock);
+		}
+		sink.pushNodes(nodes);
+		break;
+	case TokenType.Mixin:
+		auto next = ps.lookahead(1).type;
+		if (next == TokenType.Function) {
+			ir.MixinFunction m;
+			succeeded = parseMixinFunction(ps, out m);
 			if (!succeeded) {
 				return parseFailed(ps, ir.NodeType.TopLevelBlock);
 			}
-			sink.push(u);
-			break;
-		case TokenType.Struct:
-			ir.Struct s;
-			succeeded = parseStruct(ps, out s);
+			sink.push(m);
+		} else if (next == TokenType.Template) {
+			ir.MixinTemplate m;
+			succeeded = parseMixinTemplate(ps, out m);
+			if (!succeeded) {
+				return parseFailed(ps, ir.NodeType.TopLevelBlock);
+			}
+			sink.push(m);
+		} else {
+			return unexpectedToken(ps, ir.NodeType.TopLevelBlock);
+		}
+		break;
+	case TokenType.Const:
+		if (ps.lookahead(1).type == TokenType.OpenParen) {
+			goto default;
+		} else {
+			goto case;
+		}
+	case TokenType.At:
+	case TokenType.Extern:
+	case TokenType.Align:
+	case TokenType.Deprecated:
+	case TokenType.Private:
+	case TokenType.Protected:
+	case TokenType.Public:
+	case TokenType.Export:
+	case TokenType.Final:
+	case TokenType.Synchronized:
+	case TokenType.Override:
+	case TokenType.Abstract:
+	case TokenType.Inout:
+	case TokenType.Nothrow:
+	case TokenType.Pure: // WARNING Global/Local jumps here.
+		ir.Attribute a;
+		succeeded = parseAttribute(ps, out a);
+		if (!succeeded) {
+			return parseFailed(ps, ir.NodeType.TopLevelBlock);
+		}
+		sink.push(a);
+		break;
+	case TokenType.Global:
+	case TokenType.Local:
+		auto next = ps.lookahead(1).type;
+		if (next == TokenType.Tilde) {
+			goto case TokenType.Tilde;
+		} else if (next == TokenType.This) {
+			goto case TokenType.This;
+		}
+		goto case TokenType.Pure; // To attribute parsing.
+	case TokenType.Version:
+	case TokenType.Debug:
+		ir.ConditionTopLevel c;
+		succeeded = parseConditionTopLevel(ps, out c);
+		if (!succeeded) {
+			return parseFailed(ps, ir.NodeType.TopLevelBlock);
+		}
+		sink.push(c);
+		break;
+	case TokenType.Static:
+		auto next = ps.lookahead(1).type;
+		if (next == TokenType.Tilde) {
+			goto case TokenType.Tilde;
+		} else if (next == TokenType.This) {
+			goto case TokenType.This;
+		} else if (next == TokenType.Assert) {
+			ir.AssertStatement s;
+			succeeded = parseAssertStatement(ps, out s);
 			if (!succeeded) {
 				return parseFailed(ps, ir.NodeType.TopLevelBlock);
 			}
 			sink.push(s);
-			break;
-		case TokenType.Class:
-			ir.Class c;
-			succeeded = parseClass(ps, out c);
-			if (!succeeded) {
-				return parseFailed(ps, ir.NodeType.TopLevelBlock);
-			}
-			sink.push(c);
-			break;
-		case TokenType.Interface:
-			ir._Interface i;
-			succeeded = parseInterface(ps, out i);
-			if (!succeeded) {
-				return parseFailed(ps, ir.NodeType.TopLevelBlock);
-			}
-			sink.push(i);
-			break;
-		case TokenType.Enum:
-			ir.Node[] nodes;
-			succeeded = parseEnum(ps, out nodes);
-			if (!succeeded) {
-				return parseFailed(ps, ir.NodeType.TopLevelBlock);
-			}
-			sink.pushNodes(nodes);
-			break;
-		case TokenType.Mixin:
-			auto next = ps.lookahead(1).type;
-			if (next == TokenType.Function) {
-				ir.MixinFunction m;
-				succeeded = parseMixinFunction(ps, out m);
-				if (!succeeded) {
-					return parseFailed(ps, ir.NodeType.TopLevelBlock);
-				}
-				sink.push(m);
-			} else if (next == TokenType.Template) {
-				ir.MixinTemplate m;
-				succeeded = parseMixinTemplate(ps, out m);
-				if (!succeeded) {
-					return parseFailed(ps, ir.NodeType.TopLevelBlock);
-				}
-				sink.push(m);
-			} else {
-				return unexpectedToken(ps, ir.NodeType.TopLevelBlock);
-			}
-			break;
-		case TokenType.Const:
-			if (ps.lookahead(1).type == TokenType.OpenParen) {
-				goto default;
-			} else {
-				goto case;
-			}
-		case TokenType.At:
-		case TokenType.Extern:
-		case TokenType.Align:
-		case TokenType.Deprecated:
-		case TokenType.Private:
-		case TokenType.Protected:
-		case TokenType.Public:
-		case TokenType.Export:
-		case TokenType.Final:
-		case TokenType.Synchronized:
-		case TokenType.Override:
-		case TokenType.Abstract:
-		case TokenType.Inout:
-		case TokenType.Nothrow:
-		case TokenType.Pure: // WARNING Global/Local jumps here.
+		} else if (next == TokenType.If) {
+			goto case TokenType.Version;
+		} else {
 			ir.Attribute a;
 			succeeded = parseAttribute(ps, out a);
 			if (!succeeded) {
 				return parseFailed(ps, ir.NodeType.TopLevelBlock);
 			}
 			sink.push(a);
-			break;
-		case TokenType.Global:
-		case TokenType.Local:
-			auto next = ps.lookahead(1).type;
-			if (next == TokenType.Tilde) {
-				goto case TokenType.Tilde;
-			} else if (next == TokenType.This) {
-				goto case TokenType.This;
-			}
-			goto case TokenType.Pure; // To attribute parsing.
-		case TokenType.Version:
-		case TokenType.Debug:
-			ir.ConditionTopLevel c;
-			succeeded = parseConditionTopLevel(ps, out c);
-			if (!succeeded) {
-				return parseFailed(ps, ir.NodeType.TopLevelBlock);
-			}
-			sink.push(c);
-			break;
-		case TokenType.Static:
-			auto next = ps.lookahead(1).type;
-			if (next == TokenType.Tilde) {
-				goto case TokenType.Tilde;
-			} else if (next == TokenType.This) {
-				goto case TokenType.This;
-			} else if (next == TokenType.Assert) {
-				ir.StaticAssert s;
-				succeeded = parseStaticAssert(ps, out s);
-				if (!succeeded) {
-					return parseFailed(ps, ir.NodeType.TopLevelBlock);
-				}
-				sink.push(s);
-			} else if (next == TokenType.If) {
-				goto case TokenType.Version;
-			} else {
-				ir.Attribute a;
-				succeeded = parseAttribute(ps, out a);
-				if (!succeeded) {
-					return parseFailed(ps, ir.NodeType.TopLevelBlock);
-				}
-				sink.push(a);
-			}
-			break;
-		case TokenType.Semicolon:
-			// Just ignore EmptyTopLevel
-			ps.get();
-			break;
-		default:
-			succeeded = parseVariable(ps, out sink.push);
-			if (!succeeded) {
-				return parseFailed(ps, ir.NodeType.TopLevelBlock);
-			}
-			break;
+		}
+		break;
+	case TokenType.Semicolon:
+		// Just ignore EmptyTopLevel
+		ps.get();
+		break;
+	default:
+		succeeded = parseVariable(ps, out sink.push);
+		if (!succeeded) {
+			return parseFailed(ps, ir.NodeType.TopLevelBlock);
+		}
+		break;
 	}
 
 	tlb.nodes = sink.array;
@@ -593,22 +630,31 @@ ParseStatus parseDestructor(ParserStream ps, out ir.Function d)
 	return Succeeded;
 }
 
-ParseStatus parseClass(ParserStream ps, out ir.Class c)
+// If templateName is non empty, this is being parsed from a template definition.
+ParseStatus parseClass(ParserStream ps, out ir.Class c, string templateName = "")
 {
 	c = new ir.Class();
 	c.location = ps.peek.location;
 	c.docComment = ps.comment();
 
-	auto succeeded = match(ps, ir.NodeType.Class,
-		[TokenType.Class, TokenType.Identifier]);
-	if (!succeeded) {
-		return succeeded;
+	if (templateName.length == 0) {
+		if (isTemplateInstance(ps)) {
+			return parseTemplateInstance(ps, out c.templateInstance, out c.name);
+		}
+		auto succeeded = match(ps, ir.NodeType.Class,
+			[TokenType.Class, TokenType.Identifier]);
+		if (!succeeded) {
+			return succeeded;
+		}
+
+		auto nameTok = ps.previous;
+		c.name = nameTok.value;
+	} else {
+		c.name = templateName;
 	}
 
-	auto nameTok = ps.previous;
-	c.name = nameTok.value;
 	if (matchIf(ps, TokenType.Colon)) {
-		succeeded = parseQualifiedName(ps, out c.parent);
+		auto succeeded = parseQualifiedName(ps, out c.parent);
 		if (!succeeded) {
 			return parseFailed(ps, ir.NodeType.Class, ir.NodeType.QualifiedName);
 		}
@@ -630,7 +676,7 @@ ParseStatus parseClass(ParserStream ps, out ir.Class c)
 		return unexpectedToken(ps, ir.NodeType.Class);
 	}
 	ps.get();
-	succeeded = parseTopLevelBlock(ps, out c.members, TokenType.CloseBrace);
+	auto succeeded = parseTopLevelBlock(ps, out c.members, TokenType.CloseBrace);
 	if (!succeeded) {
 		return parseFailed(ps, ir.NodeType.Class, ir.NodeType.TopLevelBlock);
 	}
@@ -638,24 +684,34 @@ ParseStatus parseClass(ParserStream ps, out ir.Class c)
 	return match(ps, ir.NodeType.Class, TokenType.CloseBrace);
 }
 
-ParseStatus parseInterface(ParserStream ps, out ir._Interface i)
+// If templateName is non empty, this is being parsed from a template definition.
+ParseStatus parseInterface(ParserStream ps, out ir._Interface i, string templateName = "")
 {
 	i = new ir._Interface();
 	i.location = ps.peek.location;
 	i.docComment = ps.comment();
 
-	auto succeeded = match(ps, ir.NodeType.Interface,
-		[TokenType.Interface, TokenType.Identifier]);
-	if (!succeeded) {
-		return succeeded;
+	if (templateName.length == 0) {
+		if (isTemplateInstance(ps)) {
+			return parseTemplateInstance(ps, out i.templateInstance, out i.name);
+		}
+
+		auto succeeded = match(ps, ir.NodeType.Interface,
+			[TokenType.Interface, TokenType.Identifier]);
+		if (!succeeded) {
+			return succeeded;
+		}
+
+		auto nameTok = ps.previous;
+		i.name = nameTok.value;
+	} else {
+		i.name = templateName;
 	}
 
-	auto nameTok = ps.previous;
-	i.name = nameTok.value;
 	if (matchIf(ps, TokenType.Colon)) {
 		while (ps.peek.type != TokenType.OpenBrace) {
 			ir.QualifiedName q;
-			succeeded = parseQualifiedName(ps, out q);
+			auto succeeded = parseQualifiedName(ps, out q);
 			if (!succeeded) {
 				return parseFailed(ps, ir.NodeType.Interface, ir.NodeType.QualifiedName);
 			}
@@ -673,7 +729,7 @@ ParseStatus parseInterface(ParserStream ps, out ir._Interface i)
 		return unexpectedToken(ps, ir.NodeType.Interface);
 	}
 	ps.get();
-	succeeded = parseTopLevelBlock(ps, out i.members, TokenType.CloseBrace);
+	auto succeeded = parseTopLevelBlock(ps, out i.members, TokenType.CloseBrace);
 	if (!succeeded) {
 		return parseFailed(ps, ir.NodeType.Interface, ir.NodeType.TopLevelBlock);
 	}
@@ -681,21 +737,31 @@ ParseStatus parseInterface(ParserStream ps, out ir._Interface i)
 	return match(ps, ir.NodeType.Interface, TokenType.CloseBrace);
 }
 
-ParseStatus parseUnion(ParserStream ps, out ir.Union u)
+// If templateName is non empty, this is being parsed from a template definition.
+ParseStatus parseUnion(ParserStream ps, out ir.Union u, string templateName="")
 {
 	u = new ir.Union();
 	u.location = ps.peek.location;
 	u.docComment = ps.comment();
 
-	if (ps.peek.type != TokenType.Union) {
-		return unexpectedToken(ps, ir.NodeType.Union);
-	}
-	ps.get();
-	if (ps.peek.type == TokenType.Identifier) {
-		auto nameTok = ps.get();
-		u.name = nameTok.value;
+
+	if (templateName.length == 0) {
+		if (isTemplateInstance(ps)) {
+			return parseTemplateInstance(ps, out u.templateInstance, out u.name);
+		}
+
+		if (ps.peek.type != TokenType.Union) {
+			return unexpectedToken(ps, ir.NodeType.Union);
+		}
+		ps.get();
+		if (ps.peek.type == TokenType.Identifier) {
+			auto nameTok = ps.get();
+			u.name = nameTok.value;
+		} else {
+			return unsupportedFeature(ps, u, "anonymous union declarations");
+		}
 	} else {
-		return unsupportedFeature(ps, u, "anonymous union declarations");
+		u.name = templateName;
 	}
 
 	if (ps.peek.type == TokenType.Semicolon) {
@@ -727,21 +793,30 @@ ParseStatus parseUnion(ParserStream ps, out ir.Union u)
 	return Succeeded;
 }
 
-ParseStatus parseStruct(ParserStream ps, out ir.Struct s)
+// If templateName is non empty, this is being parsed from a template definition.
+ParseStatus parseStruct(ParserStream ps, out ir.Struct s, string templateName="")
 {
 	s = new ir.Struct();
 	s.location = ps.peek.location;
 	s.docComment = ps.comment();
 
-	if (ps.peek.type != TokenType.Struct) {
-		return unexpectedToken(ps, ir.NodeType.Struct);
-	}
-	ps.get();
-	if (ps.peek.type == TokenType.Identifier) {
-		auto nameTok = ps.get();
-		s.name = nameTok.value;
+	if (templateName.length == 0) {
+		if (isTemplateInstance(ps)) {
+			return parseTemplateInstance(ps, out s.templateInstance, out s.name);
+		}
+
+		if (ps.peek.type != TokenType.Struct) {
+			return unexpectedToken(ps, ir.NodeType.Struct);
+		}
+		ps.get();
+		if (ps.peek.type == TokenType.Identifier) {
+			auto nameTok = ps.get();
+			s.name = nameTok.value;
+		} else {
+			return unsupportedFeature(ps, s, "anonymous struct declarations");
+		}
 	} else {
-		return unsupportedFeature(ps, s, "anonymous struct declarations");
+		s.name = templateName;
 	}
 
 	if (ps.peek.type == TokenType.Semicolon) {

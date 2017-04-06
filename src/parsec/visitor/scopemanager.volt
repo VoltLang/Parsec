@@ -43,6 +43,14 @@ public:
 		return Continue;
 	}
 
+	override Status visit(ir.TemplateDefinition td)
+	{
+		if (td._struct !is null) {
+			assert(td._struct.myScope is null);
+		}
+		return Continue;
+	}
+
 	override Status enter(ir.Struct s)
 	{
 		checkPreScope(s.location, s.myScope);

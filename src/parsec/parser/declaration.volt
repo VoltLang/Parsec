@@ -19,11 +19,18 @@ import parsec.parser.expression;
 import parsec.parser.toplevel;
 import parsec.parser.declaration;
 import parsec.parser.statements;
+import parsec.parser.templates;
 
 
 ParseStatus parseVariable(ParserStream ps, NodeSinkDg dgt)
 {
 	if (ps == TokenType.Alias) {
+		if (ps.settings.internalD && isTemplateInstance(ps)) {
+			ir.Struct s;
+			parseLegacyTemplateInstance(ps, out s);
+			dgt(s);
+			return Succeeded;
+		}
 		ir.Alias a;
 		auto succeeded = parseAlias(ps, out a);
 		if (!succeeded) {
@@ -40,15 +47,24 @@ ParseStatus parseVariable(ParserStream ps, NodeSinkDg dgt)
 	}
 
 	if (ps == TokenType.Fn) {
-		ir.Function func;
-		auto succeeded = parseNewFunction(ps, out func);
-		if (!succeeded) {
-			return parseFailed(ps, ir.NodeType.Variable);
+		if (isTemplateDefinition(ps)) {
+			ir.TemplateDefinition td;
+			auto succeeded = parseTemplateDefinition(ps, out td);
+			if (!succeeded) {
+				return parseFailed(ps, ir.NodeType.Variable);
+			}
+			dgt(td);
+		} else {
+			ir.Function func;
+			auto succeeded = parseNewFunction(ps, out func);
+			if (!succeeded) {
+				return parseFailed(ps, ir.NodeType.Variable);
+			}
+			if (_global && func.kind == ir.Function.Kind.Invalid) {
+				func.kind = ir.Function.Kind.GlobalNested;
+			}
+			dgt(func);
 		}
-		if (_global && func.kind == ir.Function.Kind.Invalid) {
-			func.kind = ir.Function.Kind.GlobalNested;
-		}
-		dgt(func);
 		return Succeeded;
 	}
 
@@ -841,7 +857,8 @@ ir.Type parsePrimitiveType(ParserStream ps)
 	return ptype;
 }
 
-ParseStatus parseNewFunction(ParserStream ps, out ir.Function func)
+// If templateName is non empty, this is being parsed from a template definition.
+ParseStatus parseNewFunction(ParserStream ps, out ir.Function func, string templateName = "")
 {
 	func = new ir.Function();
 	func.type = new ir.FunctionType();
@@ -849,19 +866,30 @@ ParseStatus parseNewFunction(ParserStream ps, out ir.Function func)
 	func.location = ps.peek.location;
 	func.type.location = ps.peek.location;
 
-	auto succeeded = match(ps, func, TokenType.Fn);
-	if (!succeeded) {
-		return succeeded;
-	}
-
 	Token nameTok;
-	succeeded = match(ps, func, TokenType.Identifier, out nameTok);
-	if (!succeeded) {
-		return succeeded;
-	}
-	func.name = nameTok.value;
+	if (templateName.length == 0) {
+		if (isTemplateInstance(ps)) {
+			func.type = null;
+			return parseTemplateInstance(ps, out func.templateInstance, out func.name);
+		}
 
-	succeeded = match(ps, func, TokenType.OpenParen);
+		auto succeeded = match(ps, func, TokenType.Fn);
+		if (!succeeded) {
+			return succeeded;
+		}
+
+		succeeded = match(ps, func, TokenType.Identifier, out nameTok);
+		if (!succeeded) {
+			return succeeded;
+		}
+		func.name = nameTok.value;
+	} else {
+		func.name = templateName;
+		nameTok = new Token();
+		nameTok.value = func.name;
+	}
+
+	auto succeeded = match(ps, func, TokenType.OpenParen);
 	if (!succeeded) {
 		return succeeded;
 	}

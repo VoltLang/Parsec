@@ -10,6 +10,7 @@ import parsec.ir.expression;
 import parsec.ir.statement;
 import parsec.ir.context;
 import parsec.ir.toplevel;
+import parsec.ir.templates;
 
 
 /**
@@ -383,6 +384,7 @@ public:
 	bool isLoweredScopeSuccess;
 	/// @}
 
+	TemplateInstance templateInstance;  //< Optional. Non-null if this is a template instantiation.
 
 public:
 	this() { super(NodeType.Function); }
@@ -430,6 +432,7 @@ public:
 		this.isLoweredScopeExit = old.isLoweredScopeExit;
 		this.isLoweredScopeFailure = old.isLoweredScopeFailure;
 		this.isLoweredScopeSuccess = old.isLoweredScopeSuccess;
+		this.templateInstance = old.templateInstance;
 	}
 }
 

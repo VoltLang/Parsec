@@ -10,6 +10,7 @@ public import parsec.ir.toplevel;
 public import parsec.ir.statement;
 public import parsec.ir.expression;
 public import parsec.ir.declaration;
+public import parsec.ir.templates;
 
 
 /**
