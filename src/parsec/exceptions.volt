@@ -16,7 +16,7 @@ import parsec.lex.location;
 abstract class CompilerException : Exception
 {
 public:
-	Location location;
+	Location loc;
 	bool hasLocation = false;
 
 	/**
@@ -54,7 +54,7 @@ public:
 	this(Location loc, string message, CompilerError more, bool neverIgnore, string file = __FILE__, const int line = __LINE__)
 	{
 		this.more = more;
-		this.location = loc;
+		this.loc = loc;
 		this.hasLocation = true;
 		this.neverIgnore = neverIgnore;
 		this.allocationLocation = format("%s:%s", file, line);
