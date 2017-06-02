@@ -154,7 +154,7 @@ immutable(void)[] unescapeString(Location location, const(char)[] s)
 	return cast(immutable(void)[]) output;
 }
 
-/**
+/*!
  * Generate a hash.
  * djb2 algorithm stolen from http://www.cse.yorku.ca/~oz/hash.html
  *
@@ -172,7 +172,7 @@ uint hash(ubyte[] array)
 	return h;
 }
 
-/**
+/*!
  * Take a doc comment and remove comment cruft from it.
  */
 string cleanComment(string comment, out bool isBackwardsComment)

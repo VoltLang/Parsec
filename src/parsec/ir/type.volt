@@ -9,7 +9,7 @@ import parsec.ir.expression;
 import parsec.ir.toplevel;
 
 
-/**
+/*!
  * @defgroup irType IR Type Nodes
  *
  * Used to express the types of the Volt Language.
@@ -44,7 +44,7 @@ import parsec.ir.toplevel;
  * @ingroup irNode
  */
 
-/**
+/*!
  * Base class for all types.
  *
  * @ingroup irNode irType
@@ -52,16 +52,16 @@ import parsec.ir.toplevel;
 abstract class Type : Node
 {
 public:
-	string mangledName;  ///< Filled in with a pass.
+	string mangledName;  //!< Filled in with a pass.
 
-	/// StorageType flags.
-	/// @{
+	//! StorageType flags.
+	//! @{
 	bool isConst;
 	bool isImmutable;
 	bool isScope;
-	/// @}
+	//! @}
 
-	/// The type name as typed -- string vs immutable(char)[].
+	//! The type name as typed -- string vs immutable(char)[].
 	string glossedName;
 
 protected:
@@ -80,7 +80,7 @@ protected:
 	}
 }
 
-/**
+/*!
  * PrimitiveTypes are types that are entirely
  * well known to the compiler ahead of time. Consisting
  * mostly of integral types, the only abstract one is
@@ -134,7 +134,7 @@ public:
 
 public:
 	Kind type;
-	Token originalToken;  ///< Used for printing both 'int' and 'i32', etc.
+	Token originalToken;  //!< Used for printing both 'int' and 'i32', etc.
 
 
 public:
@@ -149,7 +149,7 @@ public:
 	}
 }
 
-/**
+/*!
  * A TypeReference is generated for user defined types, and a pass fills
  * in the information so it can act as a cache, and not require multiple
  * lookups.
@@ -161,8 +161,8 @@ public:
 class TypeReference : Type
 {
 public:
-	Type type;  ///< What Type this refers to. Filled in after parsing sometime.
-	QualifiedName id; ///< The name of the Type. Filled in the initial parsing.
+	Type type;  //!< What Type this refers to. Filled in after parsing sometime.
+	QualifiedName id; //!< The name of the Type. Filled in the initial parsing.
 
 public:
 	this() { super(NodeType.TypeReference); }
@@ -175,7 +175,7 @@ public:
 	}
 }
 
-/**
+/*!
  * TypeOf is generated for typeof(expression), anywhere a type could be
  * used. This is then used as if the type of the expression had been
  * written out by hand.
@@ -183,7 +183,7 @@ public:
 class TypeOf : Type
 {
 public:
-	Exp exp;  ///< The expression to get the type of.
+	Exp exp;  //!< The expression to get the type of.
 
 public:
 	this() { super(NodeType.TypeOf); }
@@ -195,7 +195,7 @@ public:
 	}
 }
 
-/**
+/*!
  * A pointer is an abstraction of an address. 
  * You can dereference a pointer (get the thing it's pointing to),
  * perform pointer arithmetic (move to the next possible address that
@@ -213,7 +213,7 @@ class PointerType : Type
 {
 public:
 	Type base;
-	/**
+	/*!
 	 * If this is true, then this pointer represents a
 	 * reference -- that is to say, it is presented to
 	 * the user as the base type, but is handled as a
@@ -234,7 +234,7 @@ public:
 	}
 }
 
-/**
+/*!
  * The NullType represents the Type of a null.
  *
  * null's are like water, they fill the shape of their container,
@@ -253,7 +253,7 @@ public:
 	}
 }
 
-/**
+/*!
  * An ArrayType represents a slice of memory. It contains a pointer,
  * that contains elements of the base type, and a length, which says
  * how many elements this slice shows. This is lowered into a struct
@@ -283,7 +283,7 @@ public:
 	}
 }
 
-/**
+/*!
  * A type that is either an @p AAType or a @p StaticArrayType,
  * but we cannot tell which yet.
  *
@@ -308,7 +308,7 @@ public:
 	}
 }
 
-/**
+/*!
  * A StaticArray is a list of elements of type base with a
  * statically (known at compile time) number of elements.
  * Unlike C, these are passed by value to functions.
@@ -335,7 +335,7 @@ public:
 	}
 }
 
-/**
+/*!
  * An AAType is an associative array -- it associates
  * keys with values.
  *
@@ -361,7 +361,7 @@ public:
 	}
 }
 
-/**
+/*!
  * The common ancestor of DelegateTypes and FunctionTypes.
  */
 class CallableType : Type
@@ -373,7 +373,7 @@ public:
 	Type[] params;
 	bool[] isArgRef;
 	bool[] isArgOut;
-	/// @todo Get rid of this once we've moved Function.Kind here.
+	//! @todo Get rid of this once we've moved Function.Kind here.
 	bool hiddenParameter;
 	bool hasVarArgs;
 	bool varArgsProcessed;
@@ -415,7 +415,7 @@ public:
 	}
 }
 
-/**
+/*!
  * Exists as a proxy for a FunctionSet.
  *
  * The reason this exists is for a couple of reasons.
@@ -434,7 +434,7 @@ class FunctionSetType : Type
 {
 public:
 	FunctionSet set;
-	bool isFromCreateDelegate;  ///< For use in typer.
+	bool isFromCreateDelegate;  //!< For use in typer.
 
 public:
 	this() { super(NodeType.FunctionSetType); }
@@ -453,7 +453,7 @@ public:
 	}
 }
 
-/**
+/*!
  * A FunctionType represents the form of a function, and defines
  * how it is called. It has a return type and a number of parameters.
  *
@@ -474,7 +474,7 @@ public:
 	}
 }
 
-/**
+/*!
  * A DelegateType is a function pointer with an additional context
  * pointer.
  *
@@ -504,7 +504,7 @@ public:
 	}
 }
 
-/**
+/*!
  * A StorageType changes how a Type behaves.
  *
  * Nested storage types are culled like so:
@@ -558,7 +558,7 @@ public:
 		Out = TokenType.Out,
 	}
 
-	/// For bitfields.
+	//! For bitfields.
 	enum uint STORAGE_AUTO      = 0x00000001;
 	enum uint STORAGE_CONST     = 0x00000002;
 	enum uint STORAGE_IMMUTABLE = 0x00000004;
@@ -582,7 +582,7 @@ public:
 	}
 }
 
-/**
+/*!
  * For representing inferred types.
  * auto a = 3;
  * const b = 2;
@@ -592,7 +592,7 @@ public:
 class AutoType : Type
 {
 public:
-	Type explicitType;  ///< The explicit type to replace this with.
+	Type explicitType;  //!< The explicit type to replace this with.
 	bool isForeachRef;
 
 public:
@@ -606,7 +606,7 @@ public:
 	}
 }
 
-/**
+/*!
  * For constructs that have no type, used to avoid nulls in the IR.
  */
 class NoType : Type

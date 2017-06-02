@@ -15,7 +15,7 @@ import parsec.visitor.scopemanager;
 import gatherer = parsec.postparse.gatherer;
 
 
-/**
+/*!
  * Resolves imports on a single module.
  *
  * @ingroup passes passLang
@@ -96,7 +96,7 @@ public:
 		return ContinueParent;
 	}
 
-	/**
+	/*!
 	 * Takes a import that maps the module to a symbol in the current scope.
 	 *
 	 * import a = b;
@@ -111,7 +111,7 @@ public:
 		current.addScope(i, mod.myScope, i.bind.value);
 	}
 
-	/**
+	/*!
 	 * Handles a import with symbol aliases.
 	 *
 	 * import a : b, c;
@@ -143,7 +143,7 @@ public:
 		}
 	}
 
-	/**
+	/*!
 	 * Most common imports.
 	 *
 	 * import a;
@@ -184,7 +184,7 @@ public:
 		}
 	}
 
-	/**
+	/*!
 	 * Used for adding in scopes from static imports
 	 */
 	ir.Scope buildOrReturnScope(ir.Scope parent, ir.Node node, string name)

@@ -1,7 +1,7 @@
 // See copyright just below.
 module parsec.license;
 
-/**
+/*!
  * This is the license for Parsec.
  */
 enum string license = `

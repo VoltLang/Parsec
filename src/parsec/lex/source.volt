@@ -15,7 +15,7 @@ import parsec.lex.location : Location;
 alias Mark = size_t;
 
 
-/**
+/*!
  * Class for handling reading of Volt source code.
  *
  * Upon loading or getting source the ctor will validate the source
@@ -24,25 +24,25 @@ alias Mark = size_t;
 final class Source
 {
 public:
-	/// Source code, validated utf8 by constructors.
+	//! Source code, validated utf8 by constructors.
 	string source;
-	/// The location of the current character @p mChar.
+	//! The location of the current character @p mChar.
 	Location location;
-	/// Have we reached EOF, if we have current = dchar.init.
+	//! Have we reached EOF, if we have current = dchar.init.
 	bool eof = false;
 
 
 private:
-	/// The current unicode character.
+	//! The current unicode character.
 	dchar mChar;
-	/// Pointer into the string for the next character.
+	//! Pointer into the string for the next character.
 	size_t mNextIndex;
-	/// The index for mChar
+	//! The index for mChar
 	size_t mLastIndex;
 
 
 public:
-	/**
+	/*!
 	 * Sets the source to string and the current location
 	 * and validate it as a utf8 source.
 	 *
@@ -64,7 +64,7 @@ public:
 		location.line = 1;
 	}
 
-	/**
+	/*!
 	 * Copy contructor, same as @p dup.
 	 */
 	this(src: Source)
@@ -77,7 +77,7 @@ public:
 		this.mLastIndex = src.mLastIndex;
 	}
 
-	/**
+	/*!
 	 * Validate that the current start of source has a valid utf8 BOM.
 	 *
 	 * Side-effects:
@@ -100,7 +100,7 @@ public:
 		}
 	}
 
-	/**
+	/*!
 	 * Set the location to newFilename(line:1).
 	 */
 	fn changeCurrentLocation(newFilename: string, newLine: u32)
@@ -109,7 +109,7 @@ public:
 		location.line = newLine;
 	}
 
-	/**
+	/*!
 	 * Used to skip the first script line in D sources.
 	 *
 	 * Side-effects:
@@ -127,7 +127,7 @@ public:
 		skipEndOfLine();
 	}
 
-	/**
+	/*!
 	 * Used to skip whitespace in the source file,
 	 * as defined by watt.text.ascii.isWhite.
 	 *
@@ -141,7 +141,7 @@ public:
 		}
 	}
 
-	/**
+	/*!
 	 * Skips till character after next end of line or eof.
 	 *
 	 * Side-effects:
@@ -169,7 +169,7 @@ public:
 		return decode(source, ref index);
 	}
 
-	/**
+	/*!
 	 * Get the next unicode character.
 	 *
 	 * Side-effects:
@@ -208,7 +208,7 @@ public:
 		return mChar;
 	}
 
-	/**
+	/*!
 	 * Returns the current utf8 char.
 	 *
 	 * TODO:
@@ -222,7 +222,7 @@ public:
 		return mChar;
 	}
 
-	/**
+	/*!
 	 * Return the unicode character @p n chars forwards.
 	 * @p lookaheadEOF set to true if we reached EOF, otherwise false.
 	 *
@@ -254,7 +254,7 @@ public:
 		return c;
 	}
 
-	/**
+	/*!
 	 * Returns a index for the current location.
 	 *
 	 * Side-effects:
@@ -265,7 +265,7 @@ public:
 		return mLastIndex;
 	}
 
-	/**
+	/*!
 	 * Get a slice from the current token to @p mark.
 	 * @p mark must before current token.
 	 *
@@ -277,7 +277,7 @@ public:
 		return source[mark .. mLastIndex];
 	}
 
-	/**
+	/*!
 	 * Synchronise this source with a duplicated one.
 	 *
 	 * Throws:

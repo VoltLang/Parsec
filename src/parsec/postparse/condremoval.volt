@@ -10,7 +10,7 @@ import parsec.visitor.manip;
 import parsec.visitor.visitor;
 
 
-/**
+/*!
  * A pass that removes version and debug blocks, not static ifs.
  *
  * @ingroup passes passLang
@@ -175,7 +175,7 @@ protected:
 		}
 	}
 
-	/**
+	/*!
 	 * Replace conditionals with their children,
 	 * or not, depending on their Condition.
 	 */
@@ -237,7 +237,7 @@ protected:
 		return false;
 	}
 
-	/**
+	/*!
 	 * @todo Remove when not compiling under D.
 	 */
 	ir.Node[] manipNodes(ir.Node[] nodes)

@@ -693,7 +693,7 @@ ParseStatus parseParameter(ParserStream ps, out ir.Variable p)
 	p.storage = ir.Variable.Storage.Function;
 	Location origin = ps.peek.location;
 
-	/// @todo intermixed ref
+	//! @todo intermixed ref
 	bool isOut, isIn, isRef;
 	isRef = matchIf(ps, TokenType.Ref);
 	if (!isRef) {
@@ -1142,7 +1142,7 @@ ParseStatus parseFunction(ParserStream ps, out ir.Function func, ir.Type base)
 	return Succeeded;
 }
 
-/**
+/*!
  * This parses a function block, different from BlockStatement.
  *
  * void func()

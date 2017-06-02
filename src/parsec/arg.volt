@@ -12,7 +12,7 @@ import parsec.errors;
 import parsec.interfaces;
 
 
-/**
+/*!
  * Holds a set of compiler settings.
  *
  * Things like import paths, and so on.
@@ -20,63 +20,63 @@ import parsec.interfaces;
 final class Settings
 {
 public:
-	bool warningsEnabled; ///< The -w argument.
-	bool noBackend; ///< The -S argument.
-	bool noLink; ///< The -c argument
-	bool emitBitcode; ///< The --emit-bitcode argument.
-	bool noCatch; ///< The --no-catch argument.
-	bool noStdLib; ///< The --no-stdlib argument.
-	bool removeConditionalsOnly; ///< The -E argument.
-	bool simpleTrace; ///< The --simple-trace argument.
-	bool writeDocs; ///< The --doc argument.
-	bool internalD; ///< The --internal-d argument;
-	bool internalDiff; ///< The --internal-diff argument.
-	bool internalDebug; ///< The --internal-dbg argument.
-	bool missingDeps; ///< The --missing argument;
+	bool warningsEnabled; //!< The -w argument.
+	bool noBackend; //!< The -S argument.
+	bool noLink; //!< The -c argument
+	bool emitBitcode; //!< The --emit-bitcode argument.
+	bool noCatch; //!< The --no-catch argument.
+	bool noStdLib; //!< The --no-stdlib argument.
+	bool removeConditionalsOnly; //!< The -E argument.
+	bool simpleTrace; //!< The --simple-trace argument.
+	bool writeDocs; //!< The --doc argument.
+	bool internalD; //!< The --internal-d argument;
+	bool internalDiff; //!< The --internal-diff argument.
+	bool internalDebug; //!< The --internal-dbg argument.
+	bool missingDeps; //!< The --missing argument;
 
 	Platform platform;
 	Arch arch;
 
-	string identStr; ///< Compiler identifier string.
+	string identStr; //!< Compiler identifier string.
 
-	string execCmd; ///< How where we launched.
-	string execDir; ///< Set on create.
-	string platformStr; ///< Derived from platform.
-	string archStr; ///< Derived from arch.
+	string execCmd; //!< How where we launched.
+	string execDir; //!< Set on create.
+	string platformStr; //!< Derived from platform.
+	string archStr; //!< Derived from arch.
 
-	string cc; ///< The --cc argument.
-	string[] xcc; ///< Arguments to cc, the --Xcc argument.
+	string cc; //!< The --cc argument.
+	string[] xcc; //!< Arguments to cc, the --Xcc argument.
 
-	string ld; ///< The --ld argument.
-	string[] xld; ///< The --Xld argument.
+	string ld; //!< The --ld argument.
+	string[] xld; //!< The --Xld argument.
 
-	string link; ///< The --link argument.
-	string[] xlink; ///< The --Xlink argument.
+	string link; //!< The --link argument.
+	string[] xlink; //!< The --Xlink argument.
 
-	string linker; ///< The --linker argument
-	string[] xlinker; ///< Arguments to the linker, the -Xlinker argument.
+	string linker; //!< The --linker argument
+	string[] xlinker; //!< Arguments to the linker, the -Xlinker argument.
 
 	string depFile;
 	string outputFile;
 
-	string[] importAsSrc; ///< The --import-as-src command.
+	string[] importAsSrc; //!< The --import-as-src command.
 
-	string[] includePaths; ///< The -I arguments.
-	string[] srcIncludePaths; ///< The -src-I arguments.
+	string[] includePaths; //!< The -I arguments.
+	string[] srcIncludePaths; //!< The -src-I arguments.
 
-	string[] libraryPaths; ///< The -L arguments.
-	string[] libraryFiles; ///< The -l arguments.
+	string[] libraryPaths; //!< The -L arguments.
+	string[] libraryFiles; //!< The -l arguments.
 
-	string[] frameworkPaths; ///< The -F arguments.
-	string[] frameworkNames; ///< The --framework arguments.
+	string[] frameworkPaths; //!< The -F arguments.
+	string[] frameworkNames; //!< The --framework arguments.
 
-	string[] stringImportPaths; ///< The -J arguments.
+	string[] stringImportPaths; //!< The -J arguments.
 
-	string docDir; ///< The --doc-dir argument.
-	string docOutput; ///< The -do argument.
-	string jsonOutput; ///< The -jo argument.
+	string docDir; //!< The --doc-dir argument.
+	string docOutput; //!< The -do argument.
+	string jsonOutput; //!< The -jo argument.
 
-	string perfOutput; ///< The --perf-output argument.
+	string perfOutput; //!< The --perf-output argument.
 
 
 public:
@@ -170,18 +170,18 @@ public:
 		IncludePath,
 		SrcPath,
 		Warnings,
-		PreprocessOnly,  ///< -E
-		CompileOnly,     ///< -S
-		MissingDeps,     ///< --missing
-		ImportAsSrc,     ///< --import-as-src
+		PreprocessOnly,  //!< -E
+		CompileOnly,     //!< -S
+		MissingDeps,     //!< --missing
+		ImportAsSrc,     //!< --import-as-src
 
 		Debug,
 		DebugSimpleTrace,
 
-		Dep,             ///< --dep
+		Dep,             //!< --dep
 		Output,
 
-		EmitBitcode,     ///< --emit-bitcode
+		EmitBitcode,     //!< --emit-bitcode
 
 		NoLink,
 
@@ -218,7 +218,7 @@ public:
 		InternalDiff,
 		InternalPerf,
 		InternalDebug,
-		InternalNoCatch, ///< --no-catch
+		InternalNoCatch, //!< --no-catch
 	}
 
 	string arg;

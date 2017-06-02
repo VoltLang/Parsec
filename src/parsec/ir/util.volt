@@ -11,7 +11,7 @@ import parsec.util.string : unescapeString;
 import parsec.ir.copy;
 
 
-/**
+/*!
  * Builds an identifier exp from a string.
  */
 ir.IdentifierExp buildIdentifierExp(Location loc, string value, bool isGlobal = false)
@@ -22,7 +22,7 @@ ir.IdentifierExp buildIdentifierExp(Location loc, string value, bool isGlobal = 
 	return iexp;
 }
 
-/**
+/*!
  * Builds a QualifiedName from a string.
  */
 ir.QualifiedName buildQualifiedName(Location loc, string value)
@@ -35,7 +35,7 @@ ir.QualifiedName buildQualifiedName(Location loc, string value)
 	return q;
 }
 
-/**
+/*!
  * Builds a QualifiedName from an array.
  */
 ir.QualifiedName buildQualifiedName(Location loc, string[] value...)
@@ -56,7 +56,7 @@ ir.QualifiedName buildQualifiedName(Location loc, string[] value...)
 	return q;
 }
 
-/**
+/*!
  * Builds a QualifiedName from a Identifier.
  */
 ir.QualifiedName buildQualifiedNameSmart(ir.Identifier i)
@@ -67,7 +67,7 @@ ir.QualifiedName buildQualifiedNameSmart(ir.Identifier i)
 	return q;
 }
 
-/**
+/*!
  * Return the scope from the given type if it is,
  * a aggregate or a derivative from one.
  */
@@ -112,7 +112,7 @@ ir.Scope getScopeFromType(ir.Type type)
 	}
 }
 
-/**
+/*!
  * For the given store get the scope that it introduces.
  *
  * Returns null for Values and non-scope types.
@@ -138,7 +138,7 @@ ir.Scope getScopeFromStore(ir.Store store)
 	}
 }
 
-/**
+/*!
  * Does a smart copy of a type.
  *
  * Meaning that well copy all types, but skipping
@@ -273,7 +273,7 @@ ir.StorageType buildStorageType(Location loc, ir.StorageType.Kind kind, ir.Type 
 	return storage;
 }
 
-/**
+/*!
  * Build a PrimitiveType.
  */
 ir.PrimitiveType buildPrimitiveType(Location loc, ir.PrimitiveType.Kind kind)
@@ -328,7 +328,7 @@ ir.PrimitiveType buildSizeT(Location loc, TargetInfo target)
 	return pt;
 }
 
-/**
+/*!
  * Build a string (immutable(char)[]) type.
  */
 ir.ArrayType buildString(Location loc)
@@ -345,7 +345,7 @@ ir.ArrayType buildStringArray(Location loc)
 }
 
 
-/**
+/*!
  * Build a void* type.
  */
 ir.PointerType buildVoidPtr(Location loc)
@@ -411,7 +411,7 @@ ir.UnionLiteral buildUnionLiteralSmart(Location loc, ir.Type type, ir.Exp[] exps
 	return literal;
 }
 
-/**
+/*!
  * Add a Variable to the BlockStatement scope and either to
  * its statement or if StatementExp given to it instead.
  */
@@ -425,7 +425,7 @@ void addVariable(ir.BlockStatement b, ir.StatementExp statExp, ir.Variable var)
 	}
 }
 
-/**
+/*!
  * Build a Variable, while not being smart about its type.
  */
 ir.Variable buildVariable(Location loc, ir.Type type, ir.Variable.Storage st, string name, ir.Exp assign = null)
@@ -440,7 +440,7 @@ ir.Variable buildVariable(Location loc, ir.Type type, ir.Variable.Storage st, st
 	return var;
 }
 
-/**
+/*!
  * Build a Variable with an anon. name and insert it into the BlockStatement
  * or StatementExp if given. Note even if you want the Variable to end up in
  * the StatementExp you must give it the BlockStatement that the StatementExp
@@ -459,7 +459,7 @@ ir.Variable buildVariableAnonSmart(Location loc, ir.BlockStatement b,
 	return var;
 }
 
-/// Build a variable and add it to the top of a block statement.
+//! Build a variable and add it to the top of a block statement.
 ir.Variable buildVariableAnonSmartAtTop(Location loc, ir.BlockStatement b,
                                    ir.Type type, ir.Exp assign)
 {
@@ -473,7 +473,7 @@ ir.Variable buildVariableAnonSmartAtTop(Location loc, ir.BlockStatement b,
 }
 
 
-/**
+/*!
  * Create an anonymous variable for a statementexp without a block statement.
  */
 ir.Variable buildVariableAnonSmart(Location loc, ir.Scope current,
@@ -487,7 +487,7 @@ ir.Variable buildVariableAnonSmart(Location loc, ir.Scope current,
 	return var;
 }
 
-/**
+/*!
  * Copy a Variable, while being smart about its type, does
  * not copy the the assign exp on the Variable.
  */
@@ -509,7 +509,7 @@ ir.Variable[] copyVariablesSmart(Location loc, ir.Variable[] vars)
 	return outVars;
 }
 
-/**
+/*!
  * Get ExpReferences from a list of variables.
  */
 ir.Exp[] getExpRefs(Location loc, ir.FunctionParam[] vars)
@@ -525,7 +525,7 @@ ir.Exp[] getExpRefs(Location loc, ir.FunctionParam[] vars)
 	return erefs;
 }
 
-/**
+/*!
  * Build a Variable, while being smart about its type.
  */
 ir.Variable buildVariableSmart(Location loc, ir.Type type, ir.Variable.Storage st, string name)
@@ -533,7 +533,7 @@ ir.Variable buildVariableSmart(Location loc, ir.Type type, ir.Variable.Storage s
 	return buildVariable(loc, copyTypeSmart(loc, type), st, name);
 }
 
-/**
+/*!
  * Builds a usable ExpReference.
  */
 ir.ExpReference buildExpReference(Location loc, ir.Declaration decl, string[] names...)
@@ -551,7 +551,7 @@ ir.ExpReference buildExpReference(Location loc, ir.Function func)
 	return buildExpReference(loc, func, func.name);
 }
 
-/**
+/*!
  * Builds a constant double.
  */
 ir.Constant buildConstantDouble(Location loc, double value)
@@ -564,7 +564,7 @@ ir.Constant buildConstantDouble(Location loc, double value)
 	return c;
 }
 
-/**
+/*!
  * Builds a constant float.
  */
 ir.Constant buildConstantFloat(Location loc, float value)
@@ -577,7 +577,7 @@ ir.Constant buildConstantFloat(Location loc, float value)
 	return c;
 }
 
-/**
+/*!
  * Builds a constant int.
  */
 ir.Constant buildConstantInt(Location loc, int value)
@@ -659,7 +659,7 @@ ir.Constant buildConstantUshort(Location loc, ushort value)
 
 	return c;
 }
-/**
+/*!
  * Builds a constant bool.
  */
 ir.Constant buildConstantBool(Location loc, bool val)
@@ -683,7 +683,7 @@ ir.Constant buildConstantNull(Location loc, ir.Type base)
 	return c;
 }
 
-/**
+/*!
  * Gets a size_t Constant and fills it with a value.
  */
 ir.Constant buildConstantSizeT(Location loc, TargetInfo target, size_t val)
@@ -701,7 +701,7 @@ ir.Constant buildConstantSizeT(Location loc, TargetInfo target, size_t val)
 	return c;
 }
 
-/**
+/*!
  * Builds a constant string.
  */
 ir.Constant buildConstantString(Location loc, string val, bool escape = true)
@@ -720,7 +720,7 @@ ir.Constant buildConstantString(Location loc, string val, bool escape = true)
 	return c;
 }
 
-/**
+/*!
  * Builds a constant 'c' string.
  */
 ir.Exp buildConstantCString(Location loc, string val, bool escape = true)
@@ -729,7 +729,7 @@ ir.Exp buildConstantCString(Location loc, string val, bool escape = true)
 	                     buildConstantString(loc, val, escape));
 }
 
-/**
+/*!
  * Build a constant to insert to the IR from a resolved EnumDeclaration.
  */
 ir.Constant buildConstantEnum(Location loc, ir.EnumDeclaration ed)
@@ -748,7 +748,7 @@ ir.Constant buildConstantEnum(Location loc, ir.EnumDeclaration ed)
 ir.Constant buildConstantTrue(Location loc) { return buildConstantBool(loc, true); }
 ir.Constant buildConstantFalse(Location loc) { return buildConstantBool(loc, false); }
 
-/**
+/*!
  * Build a cast and sets the location, does not call copyTypeSmart.
  */
 ir.Unary buildCast(Location loc, ir.Type type, ir.Exp exp)
@@ -758,7 +758,7 @@ ir.Unary buildCast(Location loc, ir.Type type, ir.Exp exp)
 	return cst;
 }
 
-/**
+/*!
  * Build a cast, sets the location and calling copyTypeSmart
  * on the type, to avoid duplicate nodes.
  */
@@ -770,7 +770,7 @@ ir.Unary buildCastSmart(Location loc, ir.Type type, ir.Exp exp)
 ir.Unary buildCastToBool(Location loc, ir.Exp exp) { return buildCast(loc, buildBool(loc), exp); }
 ir.Unary buildCastToVoidPtr(Location loc, ir.Exp exp) { return buildCast(loc, buildVoidPtr(loc), exp); }
 
-/**
+/*!
  * Builds a not expression.
  */
 ir.Unary buildNot(Location loc, ir.Exp exp)
@@ -782,7 +782,7 @@ ir.Unary buildNot(Location loc, ir.Exp exp)
 	return unot;
 }
 
-/**
+/*!
  * Builds an AddrOf expression.
  */
 ir.Unary buildAddrOf(Location loc, ir.Exp exp)
@@ -794,7 +794,7 @@ ir.Unary buildAddrOf(Location loc, ir.Exp exp)
 	return addr;
 }
 
-/**
+/*!
  * Builds a ExpReference and a AddrOf from a Variable.
  */
 ir.Unary buildAddrOf(Location loc, ir.Variable var, string[] names...)
@@ -802,7 +802,7 @@ ir.Unary buildAddrOf(Location loc, ir.Variable var, string[] names...)
 	return buildAddrOf(loc, buildExpReference(loc, var, names));
 }
 
-/**
+/*!
  * Builds a dereference expression.
  */
 ir.Unary buildDeref(Location loc, ir.Exp exp)
@@ -814,7 +814,7 @@ ir.Unary buildDeref(Location loc, ir.Exp exp)
 	return deref;
 }
 
-/**
+/*!
  * Builds an expression that dereferences a variable.
  */
 ir.Unary buildDeref(Location loc, ir.Variable var)
@@ -823,7 +823,7 @@ ir.Unary buildDeref(Location loc, ir.Variable var)
 	return buildDeref(loc, eref);
 }
 
-/**
+/*!
  * Builds a New expression.
  */
 ir.Unary buildNew(Location loc, ir.Type type, string name, ir.Exp[] arguments...)
@@ -856,7 +856,7 @@ ir.Unary buildNewSmart(Location loc, ir.Type type, ir.Exp[] arguments...)
 	return new_;
 }
 
-/**
+/*!
  * Builds a typeid with type smartly.
  */
 ir.Typeid buildTypeidSmart(Location loc, ir.Type type)
@@ -867,7 +867,7 @@ ir.Typeid buildTypeidSmart(Location loc, ir.Type type)
 	return t;
 }
 
-/**
+/*!
  * Build a typeid casting if needed.
  */
 ir.Exp buildTypeidSmart(Location loc, LanguagePass lp, ir.Type type)
@@ -875,7 +875,7 @@ ir.Exp buildTypeidSmart(Location loc, LanguagePass lp, ir.Type type)
 	return buildCastSmart(loc, lp.tiTypeInfo, buildTypeidSmart(loc, type));
 }
 
-/**
+/*!
  * Builds a BuiltinExp of ArrayPtr type. Make sure the type you
  * pass in is the base of the array and that the child exp is
  * not a pointer to an array.
@@ -890,7 +890,7 @@ ir.BuiltinExp buildArrayPtr(Location loc, ir.Type base, ir.Exp child)
 	return builtin;
 }
 
-/**
+/*!
  * Builds a BuiltinExp of ArrayLength type. Make sure the child exp is
  * not a pointer to an array.
  */
@@ -904,7 +904,7 @@ ir.BuiltinExp buildArrayLength(Location loc, TargetInfo target, ir.Exp child)
 	return builtin;
 }
 
-/**
+/*!
  * Builds an ArrayDup BuiltinExp.
  */
 ir.BuiltinExp buildArrayDup(Location loc, ir.Type t, ir.Exp[] children)
@@ -915,7 +915,7 @@ ir.BuiltinExp buildArrayDup(Location loc, ir.Type t, ir.Exp[] children)
 	return bi;
 }
 
-/**
+/*!
  * Builds a BuiltinExp of AALength type.
  */
 ir.BuiltinExp buildAALength(Location loc, TargetInfo target, ir.Exp[] child)
@@ -928,7 +928,7 @@ ir.BuiltinExp buildAALength(Location loc, TargetInfo target, ir.Exp[] child)
 	return builtin;
 }
 
-/**
+/*!
  * Builds a BuiltinExp of AAKeys type.
  */
 ir.BuiltinExp buildAAKeys(Location loc, ir.AAType aa, ir.Exp[] child)
@@ -941,7 +941,7 @@ ir.BuiltinExp buildAAKeys(Location loc, ir.AAType aa, ir.Exp[] child)
 	return builtin;
 }
 
-/**
+/*!
  * Builds a BuiltinExp of AAValues type.
  */
 ir.BuiltinExp buildAAValues(Location loc, ir.AAType aa, ir.Exp[] child)
@@ -954,7 +954,7 @@ ir.BuiltinExp buildAAValues(Location loc, ir.AAType aa, ir.Exp[] child)
 	return builtin;
 }
 
-/**
+/*!
  * Builds a BuiltinExp of AARehash type.
  */
 ir.BuiltinExp buildAARehash(Location loc, ir.Exp[] child)
@@ -967,7 +967,7 @@ ir.BuiltinExp buildAARehash(Location loc, ir.Exp[] child)
 	return builtin;
 }
 
-/**
+/*!
  * Builds a BuiltinExp of AAGet type.
  */
 ir.BuiltinExp buildAAGet(Location loc, ir.AAType aa, ir.Exp[] child)
@@ -978,7 +978,7 @@ ir.BuiltinExp buildAAGet(Location loc, ir.AAType aa, ir.Exp[] child)
 	return builtin;
 }
 
-/**
+/*!
  * Builds a BuiltinExp of AARemove type.
  */
 ir.BuiltinExp buildAARemove(Location loc, ir.Exp[] child)
@@ -992,7 +992,7 @@ ir.BuiltinExp buildAARemove(Location loc, ir.Exp[] child)
 }
 
 
-/**
+/*!
  * Builds a BuiltinExp of AARemove type.
  */
 ir.BuiltinExp buildUFCS(Location loc, ir.Type type, ir.Exp child,
@@ -1007,7 +1007,7 @@ ir.BuiltinExp buildUFCS(Location loc, ir.Type type, ir.Exp child,
 }
 
 
-/**
+/*!
  * Builds a BuiltinExp of Classinfo type.
  */
 ir.BuiltinExp buildClassinfo(Location loc, ir.Type type, ir.Exp child)
@@ -1019,7 +1019,7 @@ ir.BuiltinExp buildClassinfo(Location loc, ir.Type type, ir.Exp child)
 }
 
 
-/**
+/*!
  * Builds a BuiltinExp of AARemove type.
  */
 ir.BuiltinExp buildAAIn(Location loc, ir.AAType aa, ir.Exp[] child)
@@ -1030,7 +1030,7 @@ ir.BuiltinExp buildAAIn(Location loc, ir.AAType aa, ir.Exp[] child)
 	return bi;
 }
 
-/**
+/*!
  * Builds a BuiltinExp of AADup type.
  */
 ir.BuiltinExp buildAADup(Location loc, ir.AAType aa, ir.Exp[] child)
@@ -1041,7 +1041,7 @@ ir.BuiltinExp buildAADup(Location loc, ir.AAType aa, ir.Exp[] child)
 	return bi;
 }
 
-/**
+/*!
  * Builds a BuiltinExp of PODCtor type.
  */
 ir.BuiltinExp buildPODCtor(Location loc, ir.PODAggregate pod, ir.Postfix postfix, ir.Function ctor)
@@ -1052,7 +1052,7 @@ ir.BuiltinExp buildPODCtor(Location loc, ir.PODAggregate pod, ir.Postfix postfix
 	return bi;
 }
 
-/**
+/*!
  * Build a postfix Identifier expression.
  */
 ir.Postfix buildPostfixIdentifier(Location loc, ir.Exp exp, string name)
@@ -1078,7 +1078,7 @@ ir.AccessExp buildAccessExp(Location loc, ir.Exp child, ir.Variable field)
 	return ae;
 }
 
-/**
+/*!
  * Builds a chain of postfix lookups from a QualifiedName.
  * These are only useful before the extyper runs.
  */
@@ -1098,7 +1098,7 @@ ir.Postfix buildPostfixIdentifier(Location loc, ir.QualifiedName qname, string n
 	return buildPostfixIdentifier(loc, current, name);
 }
 
-/**
+/*!
  * Builds a postfix slice.
  */
 ir.Postfix buildSlice(Location loc, ir.Exp child, ir.Exp[] args...)
@@ -1116,7 +1116,7 @@ ir.Postfix buildSlice(Location loc, ir.Exp child, ir.Exp[] args...)
 	return slice;
 }
 
-/**
+/*!
  * Builds a postfix increment.
  */
 ir.Postfix buildIncrement(Location loc, ir.Exp child)
@@ -1129,7 +1129,7 @@ ir.Postfix buildIncrement(Location loc, ir.Exp child)
 	return inc;
 }
 
-/**
+/*!
  * Builds a postfix decrement.
  */
 ir.Postfix buildDecrement(Location loc, ir.Exp child)
@@ -1142,7 +1142,7 @@ ir.Postfix buildDecrement(Location loc, ir.Exp child)
 	return inc;
 }
 
-/**
+/*!
  * Builds a postfix index.
  */
 ir.Postfix buildIndex(Location loc, ir.Exp child, ir.Exp arg)
@@ -1156,7 +1156,7 @@ ir.Postfix buildIndex(Location loc, ir.Exp child, ir.Exp arg)
 	return slice;
 }
 
-/**
+/*!
  * Builds a postfix call.
  */
 ir.Postfix buildCall(Location loc, ir.Exp child, ir.Exp[] args)
@@ -1174,7 +1174,7 @@ ir.Postfix buildCall(Location loc, ir.Exp child, ir.Exp[] args)
 	return call;
 }
 
-/**
+/*!
  * Builds a call to a function.
  */
 ir.Postfix buildCall(Location loc, ir.Function func, ir.Exp[] args)
@@ -1226,7 +1226,7 @@ ir.PropertyExp buildProperty(Location loc, string name, ir.Exp child,
 	return prop;
 }
 
-/**
+/*!
  * Builds a postfix call.
  */
 ir.Postfix buildCall(Location loc, ir.Declaration decl, ir.Exp[] args, string[] names...)
@@ -1234,7 +1234,7 @@ ir.Postfix buildCall(Location loc, ir.Declaration decl, ir.Exp[] args, string[] 
 	return buildCall(loc, buildExpReference(loc, decl, names), args);
 }
 
-/**
+/*!
  * Builds an add BinOp.
  */
 ir.BinOp buildAdd(Location loc, ir.Exp left, ir.Exp right)
@@ -1242,7 +1242,7 @@ ir.BinOp buildAdd(Location loc, ir.Exp left, ir.Exp right)
 	return buildBinOp(loc, ir.BinOp.Op.Add, left, right);
 }
 
-/**
+/*!
  * Builds a subtraction BinOp.
  */
 ir.BinOp buildSub(Location loc, ir.Exp left, ir.Exp right)
@@ -1250,7 +1250,7 @@ ir.BinOp buildSub(Location loc, ir.Exp left, ir.Exp right)
 	return buildBinOp(loc, ir.BinOp.Op.Sub, left, right);
 }
 
-/**
+/*!
  * Builds an assign BinOp.
  */
 ir.BinOp buildAssign(Location loc, ir.Exp left, ir.Exp right)
@@ -1258,7 +1258,7 @@ ir.BinOp buildAssign(Location loc, ir.Exp left, ir.Exp right)
 	return buildBinOp(loc, ir.BinOp.Op.Assign, left, right);
 }
 
-/**
+/*!
  * Builds an assign BinOp to a given variable.
  */
 ir.BinOp buildAssign(Location loc, ir.Variable left, ir.Exp right)
@@ -1267,7 +1267,7 @@ ir.BinOp buildAssign(Location loc, ir.Variable left, ir.Exp right)
 	return buildAssign(loc, eref, right);
 }
 
-/**
+/*!
  * Builds an assign BinOp to a given variable from a given variable.
  */
 ir.BinOp buildAssign(Location loc, ir.Variable left, ir.Variable right)
@@ -1277,7 +1277,7 @@ ir.BinOp buildAssign(Location loc, ir.Variable left, ir.Variable right)
 	return buildAssign(loc, lref, rref);
 }
 
-/**
+/*!
  * Builds an add-assign BinOp.
  */
 ir.BinOp buildAddAssign(Location loc, ir.Exp left, ir.Exp right)
@@ -1285,7 +1285,7 @@ ir.BinOp buildAddAssign(Location loc, ir.Exp left, ir.Exp right)
 	return buildBinOp(loc, ir.BinOp.Op.AddAssign, left, right);
 }
 
-/**
+/*!
  * Builds a cat-assign BinOp.
  */
 ir.BinOp buildCatAssign(Location loc, ir.Exp left, ir.Exp right)
@@ -1293,7 +1293,7 @@ ir.BinOp buildCatAssign(Location loc, ir.Exp left, ir.Exp right)
 	return buildBinOp(loc, ir.BinOp.Op.CatAssign, left, right);
 }
 
-/**
+/*!
  * Builds an BinOp.
  */
 ir.BinOp buildBinOp(Location loc, ir.BinOp.Op op, ir.Exp left, ir.Exp right)
@@ -1331,7 +1331,7 @@ ir.FunctionParam buildFunctionParam(Location loc, size_t index, string name, ir.
 	return fparam;
 }
 
-/**
+/*!
  * Adds a variable argument to a function, also adds it to the scope.
  */
 ir.FunctionParam addParam(Location loc, ir.Function func, ir.Type type, string name)
@@ -1348,7 +1348,7 @@ ir.FunctionParam addParam(Location loc, ir.Function func, ir.Type type, string n
 	return var;
 }
 
-/**
+/*!
  * Adds a variable argument to a function, also adds it to the scope.
  */
 ir.FunctionParam addParamSmart(Location loc, ir.Function func, ir.Type type, string name)
@@ -1356,7 +1356,7 @@ ir.FunctionParam addParamSmart(Location loc, ir.Function func, ir.Type type, str
 	return addParam(loc, func, copyTypeSmart(loc, type), name);
 }
 
-/**
+/*!
  * Builds a variable statement smartly, inserting at the end of the
  * block statements and inserting it in the scope.
  */
@@ -1368,7 +1368,7 @@ ir.Variable buildVarStatSmart(Location loc, ir.BlockStatement block, ir.Scope _s
 	return var;
 }
 
-/**
+/*!
  * Add an Exp to a StatementExp.
  */
 ir.ExpStatement buildExpStat(Location loc, ir.StatementExp stat, ir.Exp exp)
@@ -1489,7 +1489,7 @@ ir.StatementExp buildInternalArrayLiteralSliceSmart(Location loc,
 	sexp.exp = buildExpReference(loc, var, var.name);
 	return sexp;
 }
-/**
+/*!
  * Build an exp statement and add it to a block.
  */
 ir.ExpStatement buildExpStat(Location loc, ir.BlockStatement block, ir.Exp exp)
@@ -1503,7 +1503,7 @@ ir.ExpStatement buildExpStat(Location loc, ir.BlockStatement block, ir.Exp exp)
 	return ret;
 }
 
-/**
+/*!
  * Build an exp statement without inserting it anywhere.
  */
 ir.ExpStatement buildExpStat(Location loc, ir.Exp exp)
@@ -1515,7 +1515,7 @@ ir.ExpStatement buildExpStat(Location loc, ir.Exp exp)
 }
 
 
-/**
+/*!
  * Build an if statement.
  */
 ir.IfStatement buildIfStat(Location loc, ir.Exp exp,
@@ -1531,7 +1531,7 @@ ir.IfStatement buildIfStat(Location loc, ir.Exp exp,
 	return ret;
 }
 
-/**
+/*!
  * Build an if statement.
  */
 ir.IfStatement buildIfStat(Location loc, ir.BlockStatement block, ir.Exp exp,
@@ -1549,7 +1549,7 @@ ir.IfStatement buildIfStat(Location loc, ir.BlockStatement block, ir.Exp exp,
 	return ret;
 }
 
-/**
+/*!
  * Build an if statement.
  */
 ir.IfStatement buildIfStat(Location loc, ir.StatementExp statExp, ir.Exp exp,
@@ -1567,7 +1567,7 @@ ir.IfStatement buildIfStat(Location loc, ir.StatementExp statExp, ir.Exp exp,
 	return ret;
 }
 
-/**
+/*!
  * Build a block statement.
  */
 ir.BlockStatement buildBlockStat(Location loc, ir.Node introducingNode, ir.Scope _scope, ir.Node[] statements...)
@@ -1587,7 +1587,7 @@ ir.BlockStatement buildBlockStat(Location loc, ir.Node introducingNode, ir.Scope
 }
 
 
-/**
+/*!
  * Build a return statement.
  */
 ir.ReturnStatement buildReturnStat(Location loc, ir.BlockStatement block, ir.Exp exp = null)
@@ -1614,7 +1614,7 @@ ir.FunctionType buildFunctionTypeSmart(Location loc, ir.Type ret, ir.Type[] args
 	return type;
 }
 
-/// Builds a function without inserting it anywhere.
+//! Builds a function without inserting it anywhere.
 ir.Function buildFunction(Location loc, ir.Scope _scope, string name, bool buildBody = true)
 {
 	auto func = new ir.Function();
@@ -1637,7 +1637,7 @@ ir.Function buildFunction(Location loc, ir.Scope _scope, string name, bool build
 	return func;
 }
 
-/// Builds a function with a given type.
+//! Builds a function with a given type.
 ir.Function buildFunction(Location loc, ir.Scope _scope, string name, ir.FunctionType ftype)
 {
 	auto func = new ir.Function();
@@ -1655,7 +1655,7 @@ ir.Function buildFunction(Location loc, ir.Scope _scope, string name, ir.Functio
 	return func;
 }
 
-/**
+/*!
  * Builds a completely useable Function and insert it into the
  * various places it needs to be inserted.
  */
@@ -1676,7 +1676,7 @@ ir.Function buildGlobalConstructor(Location loc, ir.TopLevelBlock tlb, ir.Scope 
 	return func;
 }
 
-/**
+/*!
  * Builds a alias from a string and a Identifier.
  */
 ir.Alias buildAliasSmart(Location loc, string name, ir.Identifier i)
@@ -1688,7 +1688,7 @@ ir.Alias buildAliasSmart(Location loc, string name, ir.Identifier i)
 	return a;
 }
 
-/**
+/*!
  * Builds a alias from two strings.
  */
 ir.Alias buildAlias(Location loc, string name, string from)
@@ -1700,7 +1700,7 @@ ir.Alias buildAlias(Location loc, string name, string from)
 	return a;
 }
 
-/**
+/*!
  * Builds a completely useable struct and insert it into the
  * various places it needs to be inserted.
  *
@@ -1727,7 +1727,7 @@ ir.Struct buildStruct(Location loc, ir.TopLevelBlock tlb, ir.Scope _scope, strin
 	return s;
 }
 
-/**
+/*!
  * Builds an IR complete, but semantically unfinished struct. i.e. it has no scope and isn't inserted anywhere.
  * The members list is used directly in the new struct; be wary not to duplicate IR nodes.
  */
@@ -1747,7 +1747,7 @@ ir.Struct buildStruct(Location loc, string name, ir.Variable[] members...)
 	return s;
 }
 
-/**
+/*!
  * Add a variable to a pre-built struct.
  */
 ir.Variable addVarToStructSmart(ir.Struct _struct, ir.Variable var)
@@ -1759,7 +1759,7 @@ ir.Variable addVarToStructSmart(ir.Struct _struct, ir.Variable var)
 	return cvar;
 }
 
-/**
+/*!
  * If t is a class, or a typereference to a class, returns the
  * class. Otherwise, returns null.
  */
@@ -1881,7 +1881,7 @@ ir.Type deepStripStorage(ir.Type type)
 	return type;
 }
 
-/// Returns the base of consecutive pointers. e.g. 'int***' returns 'int'.
+//! Returns the base of consecutive pointers. e.g. 'int***' returns 'int'.
 ir.Type realBase(ir.PointerType ptr)
 {
 	ir.Type base;
@@ -1892,7 +1892,7 @@ ir.Type realBase(ir.PointerType ptr)
 	return base;
 }
 
-/// Build a with statement that has no block.
+//! Build a with statement that has no block.
 ir.WithStatement buildWithStatement(Location loc, ir.Exp exp)
 {
 	auto ws = new ir.WithStatement();
@@ -1908,7 +1908,7 @@ ir.TokenExp buildTokenExp(Location loc, ir.TokenExp.Type type)
 	return texp;
 }
 
-/// Build a simple index for loop. for (i = 0; i < length; ++i)
+//! Build a simple index for loop. for (i = 0; i < length; ++i)
 void buildForStatement(Location loc, TargetInfo target, ir.Scope parent, ir.Exp length, out ir.ForStatement forStatement, out ir.Variable ivar)
 {
 	forStatement = new ir.ForStatement();
@@ -1973,7 +1973,7 @@ ir.NoType buildNoType(Location loc)
 	return nt;
 }
 
-/// Build a cast to a TypeInfo.
+//! Build a cast to a TypeInfo.
 ir.Exp buildTypeInfoCast(LanguagePass lp, ir.Exp e)
 {
 	return buildCastSmart(e.location, lp.tiTypeInfo, e);

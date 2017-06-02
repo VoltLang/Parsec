@@ -9,7 +9,7 @@ import parsec.lex.source : Source;
 import parsec.lex.error;
 
 
-/**
+/*!
  * Small container class for tokens, used by the lexer to write tokens to.
  */
 final class TokenWriter
@@ -24,7 +24,7 @@ private:
 
 
 public:
-	/**
+	/*!
 	 * Create a new TokenWriter and initialize
 	 * the first token to TokenType.Begin.
 	 */
@@ -34,7 +34,7 @@ public:
 		initTokenArray();
 	}
 
-	/**
+	/*!
 	 * Return the current source.
 	 *
 	 * Side-effects:
@@ -45,7 +45,7 @@ public:
 		return mSource;
 	}
 
-	/**
+	/*!
 	 * Add the
 	 * Return the last added token.
 	 *
@@ -67,7 +67,7 @@ public:
 		token.loc.length = cast(u32)token.value.length;
 	}
 
-	/**
+	/*!
 	 * Remove the last token from the token list.
 	 * No checking is performed, assumes you _know_ that you can remove a token.
 	 *
@@ -82,7 +82,7 @@ public:
 		mTokens[--mLength] = null;
 	}
 
-	/**
+	/*!
 	 * Return the last added token.
 	 *
 	 * Side-effects:
@@ -96,7 +96,7 @@ public:
 		return mTokens[mLength - 1];
 	}
 
-	/**
+	/*!
 	 * Returns this writer's tokens.
 	 *
 	 * TODO: Currently this function will leave the writer in a bit of a
@@ -115,7 +115,7 @@ public:
 
 
 private:
-	/**
+	/*!
 	 * Create a Begin token add set the token array
 	 * to single array only containing it.
 	 *

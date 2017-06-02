@@ -8,7 +8,7 @@ import parsec.lex.location;
 import ir = parsec.ir.ir;
 
 
-/**
+/*!
  * Each of these listed platforms corresponds
  * to a Version identifier.
  *
@@ -28,7 +28,7 @@ enum Platform
 	Metal,
 }
 
-/**
+/*!
  * Each of these listed architectures corresponds
  * to a Version identifier.
  */
@@ -39,7 +39,7 @@ enum Arch
 	X86_64,
 }
 
-/**
+/*!
  * Holds information about the target that we are compiling to.
  */
 class TargetInfo
@@ -82,7 +82,7 @@ class TargetInfo
 	Alignments alignment;
 }
 
-/**
+/*!
  * A set of version/debug identifiers.
  */
 final class VersionSet
@@ -90,7 +90,7 @@ final class VersionSet
 public:
 	bool debugEnabled;
 
-	/// These are always set
+	//! These are always set
 	enum string[] defaultVersions = [
 		"all",
 		"Volt",
@@ -122,9 +122,9 @@ public:
 	];
 
 private:
-	/// If the ident exists and is true, it's set, if false it's reserved.
+	//! If the ident exists and is true, it's set, if false it's reserved.
 	bool[string] mVersionIdentifiers;
-	/// If the ident exists, it's set.
+	//! If the ident exists, it's set.
 	bool[string] mDebugIdentifiers;
 
 
@@ -140,7 +140,7 @@ public:
 		}
 	}
 
-	/// Returns: true if the version was set, false if reserved.
+	//! Returns: true if the version was set, false if reserved.
 	final bool setVersionIdentifier(string ident)
 	{
 		if (auto p = ident in mVersionIdentifiers) {
@@ -152,19 +152,19 @@ public:
 		return true;
 	}
 
-	/// Doesn't throw on ident reserve.
+	//! Doesn't throw on ident reserve.
 	final void overwriteVersionIdentifier(string ident)
 	{
 		mVersionIdentifiers[ident] = true;
 	}
 
-	/// Doesn't throw, debug identifiers can't be reserved.
+	//! Doesn't throw, debug identifiers can't be reserved.
 	final void setDebugIdentifier(string ident)
 	{
 		mDebugIdentifiers[ident] = true;
 	}
 
-	/**
+	/*!
 	 * Check if a given version identifier is set.
 	 * Params:
 	 *   ident = the identifier to check.
@@ -179,7 +179,7 @@ public:
 		}
 	}
 
-	/**
+	/*!
 	 * Check if a given debug identifier is set.
 	 * Params:
 	 *   ident = the identifier to check.
@@ -190,24 +190,24 @@ public:
 		return (ident in mDebugIdentifiers) !is null;
 	}
 
-	/**
+	/*!
 	 * Quick helpers to get version flags.
 	 * @{
 	 */
 	@property bool isP64() { return isVersionSet("V_P64"); }
-	/**
+	/*!
 	 * @}
 	 */
 
 private:
-	/// Marks an identifier as unable to be set. Doesn't set the identifier.
+	//! Marks an identifier as unable to be set. Doesn't set the identifier.
 	final void reserveVersionIdentifier(string ident)
 	{
 		mVersionIdentifiers[ident] = false;
 	}
 }
 
-/**
+/*!
  * Home to logic for tying Frontend, Pass and Backend together and
  * abstracts away several IO related functions. Such as looking up
  * module files and printing error messages.
@@ -221,16 +221,16 @@ public:
 
 
 public:
-	/// Load a module source from file system.
+	//! Load a module source from file system.
 	abstract ir.Module loadModule(ir.QualifiedName name);
 
-	/// Load a filename from the string import paths.
+	//! Load a filename from the string import paths.
 	abstract string stringImport(Location loc, string filename);
 
-	/// Get the modules given on the command line.
+	//! Get the modules given on the command line.
 	abstract ir.Module[] getCommandLineModules();
 
-	/**
+	/*!
 	 * Returns a delegate that runs the given function from
 	 * the given module.
 	 *
@@ -247,13 +247,13 @@ public:
 	abstract void close();
 }
 
-/**
+/*!
  * Start of the compile pipeline, it lexes source, parses tokens and do
  * some very lightweight transformation of internal AST into Volt IR.
  */
 interface Frontend
 {
-	/**
+	/*!
 	 * Parse a module and all its children from the given source.
 	 * Filename is the file from which file the source was loaded from.
 	 *
@@ -262,7 +262,7 @@ interface Frontend
 	 */
 	ir.Module parseNewFile(string source, string filename);
 
-	/**
+	/*!
 	 * Parse a zero or more statements from a string, does not
 	 * need to start with '{' or end with a '}'.
 	 *
@@ -276,12 +276,12 @@ interface Frontend
 	void close();
 }
 
-/**
+/*!
  * @defgroup passes Passes
  * @brief Volt is a passes based compiler.
  */
 
-/**
+/*!
  * Interface implemented by transformation, debug and/or validation passes.
  *
  * Transformation passes often lowers high level Volt IR into something
@@ -299,7 +299,7 @@ interface Pass
 	void close();
 }
 
-/**
+/*!
  * @defgroup passLang Language Passes
  * @ingroup passes
  * @brief Language Passes verify and slightly transforms parsed modules.
@@ -329,7 +329,7 @@ interface Pass
  * inoke Phase 1 and 2 on newly generated code.
  */
 
-/**
+/*!
  * Center point for all language passes.
  * @ingroup passes passLang
  */
@@ -341,14 +341,14 @@ public:
 	TargetInfo target;
 	Frontend frontend;
 
-	/**
+	/*!
 	 * For controlling if we should accept some D constructs.
 	 */
 	bool beMoreLikeD;
 
 	bool warningsEnabled;
 
-	/**
+	/*!
 	 * Cached lookup items.
 	 * @{
 	 */
@@ -415,9 +415,9 @@ public:
 	ir.Function llvmMemset32;
 	ir.Function llvmMemset64;
 
-	/* @} */
+	/*! @} */
 
-	/**
+	/*!
 	 * Type id constants for TypeInfo.
 	 * @{
 	 */
@@ -452,7 +452,7 @@ public:
 	int TYPE_AA;
 	int TYPE_FUNCTION;
 	int TYPE_DELEGATE;
-	/* @} */
+	/*! @} */
 
 public:
 	this(Driver drv, VersionSet ver, TargetInfo target, Frontend frontend)
@@ -471,7 +471,7 @@ public:
 
 	abstract void close();
 
-	/**
+	/*!
 	 * Used by the Driver to store classes it loads from arguments.
 	 *
 	 * The controller does not need to call addModule when it has loaded a
@@ -479,7 +479,7 @@ public:
 	 */
 	abstract void addModule(ir.Module mod);
 
-	/**
+	/*!
 	 * Returns a already loaded module or loads it from file.
 	 *
 	 * The expected behavior of the langauge pass is to call the Driver
@@ -487,7 +487,7 @@ public:
 	 */
 	abstract ir.Module getModule(ir.QualifiedName name);
 
-	/**
+	/*!
 	 * Retuns all currently loaded modules.
 	 */
 	abstract ir.Module[] getModules();
@@ -501,14 +501,14 @@ public:
 
 	alias DoneDg = void delegate();
 
-	/**
+	/*!
 	 * These functions are used to assure that no circular dependancies
 	 * happens when resolving nodes like: Class, Function, Variables, etc.
 	 * @{
 	 */
 	abstract DoneDg startResolving(ir.Node n);
 	abstract DoneDg startActualizing(ir.Node n);
-	/**
+	/*!
 	 * @}
 	 */
 
@@ -519,7 +519,7 @@ public:
 	 *
 	 */
 
-	/**
+	/*!
 	 * Gathers all the symbols and adds scopes where needed from
 	 * the given block statement.
 	 *
@@ -529,35 +529,35 @@ public:
 	 */
 	abstract void gather(ir.Scope current, ir.BlockStatement bs);
 
-	/**
+	/*!
 	 * Resolves an Attribute, for UserAttribute usages.
 	 */
 	abstract void resolve(ir.Scope current, ir.Attribute a);
 
-	/**
+	/*!
 	 * Resolve a set of user attributes.
 	 */
 	abstract void resolve(ir.Scope current, ir.Attribute[] userAttrs);
 
-	/**
+	/*!
 	 * Resolves an ExpReference, forwarding the decl appropriately.
 	 */
 	abstract void resolve(ir.Scope current, ir.ExpReference eref);
 
-	/**
+	/*!
 	 * Resolves an EnumDeclaration setting its value.
 	 *
 	 * @throws CompilerError on failure to resolve the enum value.
 	 */
 	abstract void resolve(ir.Scope current, ir.EnumDeclaration ed);
 
-	/**
+	/*!
 	 * Resolves an ir.Store that is of kind Merge. Afterwards the kind
 	 * is changed to kind Function, since only functions can be merged.
 	 */
 	abstract void resolve(ir.Store);
 
-	/**
+	/*!
 	 * Resolves a Function making it usable externaly,
 	 *
 	 * @throws CompilerError on failure to resolve function.
@@ -565,7 +565,7 @@ public:
 	final void resolve(ir.Scope current, ir.Function func)
 	{ if (!func.isResolved) doResolve(current, func); }
 
-	/**
+	/*!
 	 * Resolves a Variable making it usable externaly.
 	 *
 	 * @throws CompilerError on failure to resolve variable.
@@ -573,7 +573,7 @@ public:
 	final void resolve(ir.Scope current, ir.Variable v)
 	{ if (!v.isResolved) doResolve(current, v); }
 
-	/**
+	/*!
 	 * Resolves a unresolved alias store, the store can
 	 * change type to Type, either the field myAlias or
 	 * type is set.
@@ -583,7 +583,7 @@ public:
 	final void resolve(ir.Alias a)
 	{ if (!a.isResolved) doResolve(a); }
 
-	/**
+	/*!
 	 * Resolves an Enum making it usable externaly, done on lookup of it.
 	 *
 	 * @throws CompilerError on failure to resolve the enum.
@@ -591,31 +591,31 @@ public:
 	final void resolveNamed(ir.Enum e)
 	{ if (!e.isResolved) doResolve(e); }
 
-	/**
+	/*!
 	 * Resolves a Struct, done on lookup of it.
 	 */
 	final void resolveNamed(ir.Struct s)
 	{ if (!s.isResolved) doResolve(s); }
 
-	/**
+	/*!
 	 * Resolves a Union, done on lookup of it.
 	 */
 	final void resolveNamed(ir.Union u)
 	{ if (!u.isResolved) doResolve(u); }
 
-	/**
+	/*!
 	 * Resolves a Class, making sure the parent class is populated.
 	 */
 	final void resolveNamed(ir.Class c)
 	{ if (!c.isResolved) doResolve(c); }
 
-	/**
+	/*!
 	 * Resolves an Interface.
 	 */
 	final void resolveNamed(ir._Interface i)
 	{ if (!i.isResolved) doResolve(i); }
 
-	/**
+	/*!
 	 * Actualize a Struct, making sure all its fields and methods
 	 * are populated, and any embedded structs (not referenced
 	 * via pointers) are actualized as well. In short makes sure
@@ -624,7 +624,7 @@ public:
 	final void actualize(ir.Struct s)
 	{ if (!s.isActualized) doActualize(s); }
 
-	/**
+	/*!
 	 * Actualize a Union, making sure all its fields and methods
 	 * are populated, and any embedded structs (not referenced
 	 * via pointers) are resolved as well.
@@ -632,13 +632,13 @@ public:
 	final void actualize(ir.Union u)
 	{ if (!u.isActualized) doActualize(u); }
 
-	/**
+	/*!
 	 * Actualize an Interface.
 	 */
 	final void actualize(ir._Interface i)
 	{ if (!i.isActualized) doActualize(i); }
 
-	/**
+	/*!
 	 * Actualize a Class, making sure all its fields and methods
 	 * are populated, Any embedded structs (not referenced via
 	 * pointers) are resolved as well. Parent classes are
@@ -685,13 +685,13 @@ protected:
 	abstract void doActualize(ir.Class c);
 }
 
-/**
+/*!
  * @defgroup passLower Lowering Passes
  * @ingroup passes
  * @brief Lowers ir before being passed of to backends.
  */
 
-/**
+/*!
  * Used to determin the output of the backend.
  */
 enum TargetType
@@ -704,7 +704,7 @@ enum TargetType
 	Host,
 }
 
-/**
+/*!
  * Interface implemented by backends. Often the last stage of the compile
  * pipe that is implemented in this compiler, optimization and linking
  * are often done outside of the compiler, either invoked directly by us
@@ -712,18 +712,18 @@ enum TargetType
  */
 interface Backend
 {
-	/**
+	/*!
 	 * Return the supported target types.
 	 */
 	TargetType[] supported();
 
-	/**
+	/*!
 	 * Set the target output type. Backends usually only
 	 * suppports one or two output types @see supported.
 	 */
 	void setTarget(TargetType type);
 
-	/**
+	/*!
 	 * Compile the given module. You need to have called setTarget before
 	 * calling this function.
 	 * See the corresponding fields on LanguagePass and Driver for what the non-Module
@@ -732,13 +732,13 @@ interface Backend
 	BackendResult compile(ir.Module m, ir.Function ehPersonality, ir.Function llvmTypeidFor,
 		string execDir, string identStr);
 
-	/**
+	/*!
 	 * Free any resources that the backend has.
 	 */
 	void close();
 }
 
-/**
+/*!
  * A result from a backend compilation.
  *
  * It can be a file that you can save onto disk.
@@ -747,14 +747,14 @@ interface Backend
  */
 interface BackendResult
 {
-	/**
+	/*!
 	 * Save the result to disk.
 	 */
 	void saveToFile(string filename);
 
 	alias CompiledDg = ir.Constant delegate(ir.Constant[]);
 
-	/**
+	/*!
 	 * Returns a delegate that runs the given function from
 	 * the module that this object was compiled from.
 	 *
@@ -767,7 +767,7 @@ interface BackendResult
 	 */
 	CompiledDg getFunction(ir.Function);
 
-	/**
+	/*!
 	 * Free any resources that this result has.
 	 */
 	void close();

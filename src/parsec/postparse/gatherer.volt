@@ -319,7 +319,7 @@ void addScope(ir.Scope current, ir._Interface i)
 }
 
 
-/**
+/*!
  * Poplate the scops with Variables, Alias, Functions and Types.
  * Adds scopes where needed as well.
  *

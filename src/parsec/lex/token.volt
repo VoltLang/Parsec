@@ -47,7 +47,7 @@ enum immutable(string)[] _tokenToString = [
 "@",
 ];
 
-/**
+/*!
  * Ensure that the above list and following enum stay in sync,
  * and that the enum starts at zero and increases sequentially
  * (i.e. adding a member increases TokenType.max).
@@ -109,7 +109,7 @@ enum TokenType
 	__Pretty_Function__, __Thread,
 	HashRun,
 
-	/// Symbols.
+	//! Symbols.
 	Slash,                  // /
 	SlashAssign,            // /=
 	Dot,                    // .
@@ -197,7 +197,7 @@ fn isPrimitiveTypeToken(token: TokenType) bool
 	}
 }
 
-/**
+/*!
  * Holds the type, the actual string and location within the source file.
  */
 class Token
@@ -209,7 +209,7 @@ class Token
 	bool isBackwardsComment;
 }
 
-/**
+/*!
  * Go from a string identifier to a TokenType.
  *
  * Side-effects:

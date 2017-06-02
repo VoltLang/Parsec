@@ -13,7 +13,7 @@ public import parsec.ir.declaration;
 public import parsec.ir.templates;
 
 
-/**
+/*!
  * @defgroup irNode IR Nodes
  *
  * The Volt IR is a representation of types and execution.
