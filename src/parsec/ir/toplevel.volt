@@ -399,8 +399,8 @@ public:
 class Class : Aggregate
 {
 public:
-	QualifiedName parent;  //< Optional.
-	QualifiedName[] interfaces;  //< Optional.
+	QualifiedName parent;  //!< Optional.
+	QualifiedName[] interfaces;  //!< Optional.
 
 	Function[] userConstructors;
 	Struct vtableStruct;
@@ -410,6 +410,7 @@ public:
 	Class parentClass;  //!< Filled in by the typeverifier.
 	_Interface[] parentInterfaces;  //!< Filled in by the typeverifier.
 	size_t[] interfaceOffsets;  //!< Filled in by the typeverifier.
+	Function[][] methodsCache;  //!< Filled in by the classresolver.
 
 	//! How a lowered class will look internally.
 	Struct layoutStruct;
@@ -419,7 +420,9 @@ public:
 
 	bool isAbstract;
 
-	TemplateInstance templateInstance;  //< Optional. Non-null if this is a template instantiation.
+	bool isFinal;
+
+	TemplateInstance templateInstance;  //!< Optional. Non-null if this is a template instantiation.
 
 public:
 	this() { super(NodeType.Class); }
@@ -431,9 +434,11 @@ public:
 		version (Volt) {
 			this.interfaces = new old.interfaces[0 .. $];
 			this.userConstructors = new old.userConstructors[0 .. $];
+			this.methodsCache = new old.methodsCache[0 .. $];
 		} else {
 			this.interfaces = old.interfaces.dup;
 			this.userConstructors = old.userConstructors.dup;
+			this.methodsCache = old.methodsCache.dup;
 		}
 
 		this.vtableStruct = old.vtableStruct;
@@ -457,6 +462,7 @@ public:
 
 		this.isObject = old.isObject;
 		this.isAbstract = old.isAbstract;
+		this.isFinal = old.isFinal;
 		this.templateInstance = old.templateInstance;
 	}
 }
@@ -478,7 +484,7 @@ public:
 	//! How a lowered interface will look internally.
 	Struct layoutStruct;
 
-	TemplateInstance templateInstance;  //< Optional. Non-null if this is a template instantiation.
+	TemplateInstance templateInstance;  //!< Optional. Non-null if this is a template instantiation.
 
 public:
 	this() { super(NodeType.Interface); }
@@ -514,7 +520,7 @@ class Union : PODAggregate
 public:
 	size_t totalSize; // Total size in memory.
 
-	TemplateInstance templateInstance;  //< Optional. Non-null if this is a template instantiation.
+	TemplateInstance templateInstance;  //!< Optional. Non-null if this is a template instantiation.
 
 public:
 	this() { super(NodeType.Union); }
@@ -542,7 +548,7 @@ class Struct : PODAggregate
 public:
 	Node loweredNode;  //!< If not null, this struct was lowered from this.
 
-	TemplateInstance templateInstance;  //< Optional. Non-null if this is a template instantiation.
+	TemplateInstance templateInstance;  //!< Optional. Non-null if this is a template instantiation.
 
 public:
 	this() { super(NodeType.Struct); }
@@ -586,31 +592,6 @@ public:
 		super(NodeType.Enum, old);
 		this.members = old.members;
 		this.base = old.base;
-	}
-}
-
-/*!
- * Compile time assert.
- * If the expression is false, then compilation is halted with
- * an optional message.
- *
- * @ingroup irNode irTopLevel
- */
-class StaticAssert : Node
-{
-public:
-	Exp exp;  //!< Often just false.
-	Exp message;  //!< Optional.
-
-
-public:
-	this() { super(NodeType.StaticAssert); }
-
-	this(StaticAssert old)
-	{
-		super(NodeType.StaticAssert, old);
-		this.exp = old.exp;
-		this.message = old.message;
 	}
 }
 
@@ -723,7 +704,7 @@ public:
 class MixinFunction : Node
 {
 public:
-	string name; //< Not optional.
+	string name; //!< Not optional.
 
 	/*!
 	 * Contains statements. These nodes are raw nodes and are

@@ -30,7 +30,7 @@ ir.Store findShadowed(ir.Scope _scope, Location loc, string name, bool warningsE
 		(_scope.node.nodeType == ir.NodeType.Class ||
 		_scope.node.nodeType == ir.NodeType.Struct ||
 		_scope.node.nodeType == ir.NodeType.Union)) {
-		warningShadowsField(loc, store.node.location, name, warningsEnabled);
+		warningShadowsField(ref loc, ref store.node.loc, name, warningsEnabled);
 		return null;
 	}
 
@@ -88,17 +88,42 @@ void gather(ir.Scope current, ir.Alias a, Where where)
 	a.store = current.addAlias(a, a.name);
 }
 
+/*!
+ * If name is reserved in current, throw an error pointing at n's location.
+ */
+void checkInvalid(ir.Scope current, ir.Node n, string name)
+{
+	auto store = current.getStore(name);
+	if (store !is null && store.kind == ir.Store.Kind.Reserved) {
+		throw makeError(store.node, format("'%s' is a reserved name in this scope.", name));
+	}
+}
+
+void checkTemplateRedefinition(ir.Scope current, string name)
+{
+	auto store = current.getStore(name);
+	if (store !is null && store.kind == ir.Store.Kind.Type) {
+		throw makeError(store.node, format("'%s' is already defined in this scope.",
+		name));
+	}
+}
+
 void gather(ir.Scope current, ir.Variable v, Where where, ir.Function[] functionStack, bool warningsEnabled)
 {
 	assert(v.access.isValidAccess());
 
 	// TODO Move to semantic.
-	auto shadowStore = findShadowed(current, v.location, v.name, warningsEnabled);
+	auto shadowStore = findShadowed(current, v.loc, v.name, warningsEnabled);
 	if (shadowStore !is null) {
 		//throw makeShadowsDeclaration(v, shadowStore.node);
 		return;
 	}
 
+	checkInvalid(current, v, v.name);
+	auto store = current.getStore(v.name);
+	if (store !is null) {
+		throw makeError(ref v.loc, format("'%s' is in use @ %s.", v.name, store.node.loc.toString()));
+	}
 	current.addValue(v, v.name);
 
 	if (v.storage != ir.Variable.Storage.Invalid) {
@@ -120,6 +145,7 @@ void gather(ir.Scope current, ir.Function func, Where where)
 	assert(func.access.isValidAccess());
 
 	if (func.name !is null) {
+		checkInvalid(current, func, func.name);
 		current.addFunction(func, func.name);
 	}
 
@@ -141,6 +167,8 @@ void gather(ir.Scope current, ir.Struct s, Where where)
 	assert(s.access.isValidAccess());
 	assert(s.myScope !is null);
 
+	checkInvalid(current, s, s.name);
+	checkTemplateRedefinition(current, s.name);
 	current.addType(s, s.name);
 }
 
@@ -149,6 +177,8 @@ void gather(ir.Scope current, ir.Union u, Where where)
 	assert(u.access.isValidAccess());
 	assert(u.myScope !is null);
 
+	checkInvalid(current, u, u.name);
+	checkTemplateRedefinition(current, u.name);
 	current.addType(u, u.name);
 }
 
@@ -157,6 +187,8 @@ void gather(ir.Scope current, ir.Class c, Where where)
 	assert(c.access.isValidAccess());
 	assert(c.myScope !is null);
 
+	checkInvalid(current, c, c.name);
+	checkTemplateRedefinition(current, c.name);
 	current.addType(c, c.name);
 }
 
@@ -165,6 +197,8 @@ void gather(ir.Scope current, ir.Enum e, Where where)
 	assert(e.access.isValidAccess());
 	assert(e.myScope !is null);
 
+	checkInvalid(current, e, e.name);
+	checkTemplateRedefinition(current, e.name);
 	current.addType(e, e.name);
 }
 
@@ -173,6 +207,8 @@ void gather(ir.Scope current, ir._Interface i, Where where)
 	assert(i.access.isValidAccess());
 	assert(i.myScope !is null);
 
+	checkInvalid(current, i, i.name);
+	checkTemplateRedefinition(current, i.name);
 	current.addType(i, i.name);
 }
 
@@ -180,6 +216,7 @@ void gather(ir.Scope current, ir.MixinFunction mf, Where where)
 {
 	// @TODO assert(mf.access.isValidAccess());
 
+	checkInvalid(current, mf, mf.name);
 	current.addTemplate(mf, mf.name);
 }
 
@@ -187,7 +224,15 @@ void gather(ir.Scope current, ir.MixinTemplate mt, Where where)
 {
 	// @TODO assert(mt.access.isValidAccess());
 
+	checkInvalid(current, mt, mt.name);
 	current.addTemplate(mt, mt.name);
+}
+
+void gather(ir.Scope current, ir.TemplateDefinition td, Where where)
+{
+	checkInvalid(current, td, td.name);
+	checkTemplateRedefinition(current, td.name);
+	current.addTemplate(td, td.name);
 }
 
 
@@ -231,10 +276,10 @@ void addScope(ir.Scope current, ir.Function func, ir.Type thisType, ir.Function[
 		return;
 	}
 
-	auto tr = buildTypeReference(thisType.location, thisType,  "__this");
+	auto tr = buildTypeReference(ref thisType.loc, thisType,  "__this");
 
 	auto thisVar = new ir.Variable();
-	thisVar.location = func.location;
+	thisVar.loc = func.loc;
 	thisVar.type = tr;
 	thisVar.name = "this";
 	thisVar.storage = ir.Variable.Storage.Function;
@@ -265,7 +310,7 @@ void addScope(ir.Scope current, ir.Struct s)
 		agg.anonymousAggregates ~= s;
 		auto name = format("%s_anonymous", agg.anonymousAggregates.length);
 		s.name = format("%s_anonymous_t", agg.anonymousAggregates.length);
-		agg.anonymousVars ~= buildVariableSmart(s.location, s, ir.Variable.Storage.Field, name);
+		agg.anonymousVars ~= buildVariableSmart(ref s.loc, s, ir.Variable.Storage.Field, name);
 		agg.members.nodes ~= agg.anonymousVars[$-1];
 	}
 	//assert(s.myScope is null);
@@ -283,7 +328,7 @@ void addScope(ir.Scope current, ir.Union u)
 		agg.anonymousAggregates ~= u;
 		auto name = format("%s_anonymous", agg.anonymousAggregates.length);
 		u.name = format("%s_anonymous_t", agg.anonymousAggregates.length);
-		agg.anonymousVars ~= buildVariableSmart(u.location, u, ir.Variable.Storage.Field, name);
+		agg.anonymousVars ~= buildVariableSmart(ref u.loc, u, ir.Variable.Storage.Field, name);
 		agg.members.nodes ~= agg.anonymousVars[$-1];
 	}	
 	//assert(u.myScope is null);
@@ -320,8 +365,8 @@ void addScope(ir.Scope current, ir._Interface i)
 
 
 /*!
- * Poplate the scops with Variables, Alias, Functions and Types.
- * Adds scopes where needed as well.
+ * Populate the scopes with Variables, Aliases, Functions, and Types.
+ * Adds Scopes where needed as well.
  *
  * @ingroup passes passLang
  */
@@ -589,6 +634,12 @@ public:
 	override Status enter(ir.EnumDeclaration e)
 	{
 		gather(current, e, where);
+		return Continue;
+	}
+
+	override Status visit(ir.TemplateDefinition td)
+	{
+		gather(current, td, where);
 		return Continue;
 	}
 

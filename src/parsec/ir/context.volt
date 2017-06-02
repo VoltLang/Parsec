@@ -65,6 +65,7 @@ public:
 		Merge,
 		Function,
 		Template,
+		Reserved,
 		FunctionParam,
 		EnumDeclaration,
 	}
@@ -195,6 +196,7 @@ public:
 		assert(kind == Kind.Alias);
 		assert(myAlias is null);
 		myAlias = s;
+		s.originalNode = node;
 	}
 
 	void markAliasResolved(Type t)
@@ -294,6 +296,20 @@ public:
 	}
 
 	/*!
+	 * Reserve a identifier in this scope.
+	 */
+	Store reserveId(Node n, string name)
+	{
+		auto store = new Store(this, n, name, Store.Kind.Reserved);
+		auto ret = name in symbols;
+		if (ret is null) {
+			symbols[name] = store;
+			return store;
+		}
+		throw panic(n, "failed to reserve ident '%s'", name);
+	}
+
+	/*!
 	 * Add a unresolved Alias to this scope. The scope in which the
 	 * alias is resolved to is default this scope, can be changed
 	 * with the look argument, used by import rebinds.
@@ -373,7 +389,7 @@ public:
 			throw panic("null Node provided to addType");
 		}
 		if (name is null) {
-			throw panic(n.location, "null name provided to addType");
+			throw panic(ref n.loc, "null name provided to addType");
 		}
 		errorOn(n, name);
 		auto store = new Store(this, n, name, Store.Kind.Type);
@@ -403,7 +419,7 @@ public:
 			throw panic("null node passed to addValue");
 		}
 		if (name is null) {
-			throw panic(n.location, "null name passed to addValue");
+			throw panic(ref n.loc, "null name passed to addValue");
 		}
 		errorOn(n, name);
 		Store store;

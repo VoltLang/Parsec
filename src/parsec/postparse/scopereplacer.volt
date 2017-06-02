@@ -57,6 +57,26 @@ class ScopeReplacer : NullVisitor, Pass
 		return Continue;
 	}
 
+	override Status visit(ir.TemplateDefinition td)
+	{
+		if (td._struct !is null) {
+			return accept(td._struct, this);
+		}
+		if (td._union !is null) {
+			return accept(td._union, this);
+		}
+		if (td._interface !is null) {
+			return accept(td._interface, this);
+		}
+		if (td._class !is null) {
+			return accept(td._class, this);
+		}
+		if (td._function !is null) {
+			return accept(td._function, this);
+		}
+		throw panic("Invalid TemplateDefinition");
+	}
+
 
 private:
 	ir.Node handleTry(ir.TryStatement t)
@@ -73,7 +93,7 @@ private:
 			ir.ScopeKind.Exit, f, functionStack[$-1]);
 
 		auto b = new ir.BlockStatement();
-		b.location = t.location;
+		b.loc = t.loc;
 		b.statements = [func, t];
 
 		return b;
@@ -84,7 +104,7 @@ private:
 		if (functionStack.length == 0) {
 			//throw makeScopeOutsideFunction(ss.location);
 			dummyfn := new ir.Function();
-			dummyfn.location = ss.location;
+			dummyfn.loc = ss.loc;
 			dummyfn.name = "error";
 			return dummyfn;
 		}
@@ -95,12 +115,12 @@ private:
 	ir.Function convertToFunction(ir.ScopeKind kind, ir.BlockStatement block, ir.Function parent)
 	{
 		auto func = new ir.Function();
-		func.location = block.location;
+		func.loc = block.loc;
 		func.kind = ir.Function.Kind.Nested;
 
 		func.type = new ir.FunctionType();
-		func.type.location = block.location;
-		func.type.ret = buildVoid(block.location);
+		func.type.loc = block.loc;
+		func.type.ret = buildVoid(ref block.loc);
 
 		func._body = block;
 

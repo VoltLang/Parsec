@@ -148,6 +148,30 @@ public:
 	override Status leave(ir.Class c) { ctxPop(c); return Continue; }
 	override Status leave(ir._Interface i) { ctxPop(i); return Continue; }
 
+	override Status enter(ir.Attribute attr) { assert(false); }
+	override Status leave(ir.Attribute attr) { assert(false); }
+
+	override Status visit(ir.TemplateDefinition td)
+	{
+		if (td._struct !is null) {
+			return accept(td._struct, this);
+		}
+		if (td._union !is null) {
+			return accept(td._union, this);
+		}
+		if (td._interface !is null) {
+			return accept(td._interface, this);
+		}
+		if (td._class !is null) {
+			return accept(td._class, this);
+		}
+		if (td._function !is null) {
+			return accept(td._function, this);
+		}
+		throw panic("Invalid TemplateDefinition");
+	}
+
+
 protected:
 	/*
 	 * Apply functions.
@@ -230,6 +254,9 @@ protected:
 				break;
 			case Abstract:
 				func.isAbstract = true;
+				break;
+			case Final:
+				func.isFinal = true;
 				break;
 			case Static: // TODO (selfhost) remove.
 			case Local, Global:
@@ -371,6 +398,13 @@ protected:
 					throw makeBadAbstract(s, attr);
 				}
 				c.isAbstract = true;
+				break;
+			case Final:
+				auto c = cast(ir.Class) s;
+				if (c is null) {
+					throw makeBadFinal(s, attr);
+				}
+				c.isFinal = true;
 				break;
 			default:
 				// Warn?

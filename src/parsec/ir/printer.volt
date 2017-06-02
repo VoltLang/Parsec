@@ -20,6 +20,10 @@ string printType(ir.Type type, bool alwaysGlossed = false)
 
 void write(Sink sink, ir.Type type, bool alwaysGlossed)
 {
+	if (type is null) {
+		sink("(null)");
+		return;
+	}
 	string suffix;
 	if (type.isConst) {
 		sink("const(");
@@ -44,7 +48,7 @@ void write(Sink sink, ir.Type type, bool alwaysGlossed)
 	switch(type.nodeType) with(ir.NodeType) {
 	case PrimitiveType:
 		ir.PrimitiveType prim = cast(ir.PrimitiveType)type;
-		if (prim.originalToken !is null) {
+		if (prim.originalToken.type != TokenType.None) {
 			sink(toLower(tokenToString(prim.originalToken.type)));
 		} else {
 			sink(toLower(tokenToString(cast(TokenType)prim.type)));
@@ -120,6 +124,7 @@ void write(Sink sink, ir.Type type, bool alwaysGlossed)
 		break;
 	case Class:
 	case Struct:
+	case Interface:
 		auto agg = cast(ir.Aggregate)type;
 		assert(agg !is null);
 		sink.write(agg.myScope.parent);

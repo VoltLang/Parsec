@@ -16,6 +16,7 @@ final class TokenWriter
 {
 public:
 	LexerError[] errors;
+	bool noDoc;
 
 private:
 	mSource: Source;
@@ -53,9 +54,6 @@ public:
 	 *   None.
 	 */
 	fn addToken(token: Token) void
-	in {
-		assert(token !is null);
-	}
 	body {
 		if (mTokens.length <= mLength) {
 			auto tokens = new Token[](mLength * 2 + 3);
@@ -79,7 +77,7 @@ public:
 		assert(mLength > 0);
 	}
 	body {
-		mTokens[--mLength] = null;
+		mLength--;
 	}
 
 	/*!
@@ -124,7 +122,7 @@ private:
 	 */
 	fn initTokenArray()
 	{
-		auto start = new Token();
+		Token start;
 		start.type = TokenType.Begin;
 		start.value = "START";
 

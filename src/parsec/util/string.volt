@@ -22,7 +22,7 @@ bool isHex(dchar d)
 }
 
 
-immutable(void)[] unescapeString(Location location, const(char)[] s)
+immutable(void)[] unescapeString(ref in Location loc, const(char)[] s)
 {
 	char[] output;
 
@@ -38,7 +38,7 @@ immutable(void)[] unescapeString(Location location, const(char)[] s)
 					try {
 						i = cast(uint)toInt(hexchars, 16);
 					} catch (ConvException) {
-						throw makeExpected(location, "unicode codepoint specification");
+						throw makeExpected(ref loc, "unicode codepoint specification");
 					}
 					if (hexchars.length == 4) {
 						encode(ref output, i);
@@ -50,7 +50,7 @@ immutable(void)[] unescapeString(Location location, const(char)[] s)
 					unicoding = 0;
 					continue;
 				} else { 
-					throw makeExpected(location, "unicode codepoint specification");
+					throw makeExpected(ref loc, "unicode codepoint specification");
 				}
 			}
 			encode(ref hexchars, c);
@@ -59,7 +59,7 @@ immutable(void)[] unescapeString(Location location, const(char)[] s)
 				try {
 					i = cast(uint)toInt(hexchars, 16);
 				} catch (ConvException) {
-					throw makeExpected(location, "unicode codepoint specification");
+					throw makeExpected(ref loc, "unicode codepoint specification");
 				}
 				if (hexchars.length == 4) {
 					encode(ref output, i);
@@ -77,14 +77,14 @@ immutable(void)[] unescapeString(Location location, const(char)[] s)
 		// \xXX
 		if (hexing) {
 			if (!isHex(c)) {
-				throw makeExpected(location, "hex digit");
+				throw makeExpected(ref loc, "hex digit");
 			}
 			encode(ref hexchars, c);
 			if (hexchars.length == 2) {
 				try {
 					output ~= cast(char)toInt(hexchars, 16);
 				} catch (ConvException) {
-					throw makeExpected(location, "hex digit");
+					throw makeExpected(ref loc, "hex digit");
 				}
 				hexing = false;
 				hexchars = null;
@@ -173,57 +173,23 @@ uint hash(ubyte[] array)
 }
 
 /*!
- * Take a doc comment and remove comment cruft from it.
+ * Returns a string that is s, with all '_' removed.
+ *    "134_hello" => "134hello"
+ *    "_" => ""
  */
-string cleanComment(string comment, out bool isBackwardsComment)
+string removeUnderscores(string s)
 {
-	assert(comment.length > 2);
-	char commentChar;
-	if (comment[0..2] == "**") {
-		commentChar = '*';
-	} else if (comment[0..2] == "++") {
-		commentChar = '+';
-	} else if (comment[0..2] == "//") {
-		commentChar = '/';
-	} else {
-		assert(false, comment);
-	}
-
-	char[] outbuf;
-	bool ignoreWhitespace = true;
-	foreach (i, dchar c; comment) {
-		if (i == comment.length - 1 && commentChar != '/' && c == '/') {
+	auto output = new char[](s.length);
+	size_t i;
+	foreach (char c; s) {
+		if (c == '_') {
 			continue;
 		}
-		if (i == 2 && c == '<') {
-			isBackwardsComment = true;
-			continue;  // Skip the '<'.
-		}
-		switch (c) {
-		case '*', '+', '/':
-			if (c == commentChar && ignoreWhitespace) {
-				break;
-			}
-			goto default;
-		case ' ', '\t':
-			if (!ignoreWhitespace) {
-				goto default;
-			}
-			break;
-		case '\n':
-			ignoreWhitespace = true;
-			encode(ref outbuf, '\n');
-			break;
-		default:
-			ignoreWhitespace = false;
-			encode(ref outbuf, c);
-			break;
-		}
+		output[i++] = c;
 	}
-
 	version (Volt) {
-		return cast(immutable(char)[])new outbuf[0 .. $];
+		return i == s.length ? s : cast(string)new output[0 .. i];
 	} else {
-		return outbuf.idup;
+		return i == s.length ? s : output[0 .. i].idup;
 	}
 }

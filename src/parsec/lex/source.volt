@@ -27,7 +27,7 @@ public:
 	//! Source code, validated utf8 by constructors.
 	string source;
 	//! The location of the current character @p mChar.
-	Location location;
+	Location loc;
 	//! Have we reached EOF, if we have current = dchar.init.
 	bool eof = false;
 
@@ -60,8 +60,8 @@ public:
 
 		next();
 
-		location.filename = filename;
-		location.line = 1;
+		loc.filename = filename;
+		loc.line = 1;
 	}
 
 	/*!
@@ -70,7 +70,7 @@ public:
 	this(src: Source)
 	{
 		this.source = src.source;
-		this.location = src.location;
+		this.loc = src.loc;
 		this.eof = src.eof;
 		this.mChar = src.mChar;
 		this.mNextIndex = src.mNextIndex;
@@ -105,8 +105,9 @@ public:
 	 */
 	fn changeCurrentLocation(newFilename: string, newLine: u32)
 	{
-		location.filename = newFilename;
-		location.line = newLine;
+		loc.filename = newFilename;
+		loc.line = newLine;
+		return;
 	}
 
 	/*!
@@ -176,10 +177,7 @@ public:
 	 *   @p eof set to true if we have reached the EOF.
 	 *   @p mChar is set to the returned character if not at EOF.
 	 *   @p mIndex advanced to the end of the given character.
-	 *   @p location updated to the current position if not at EOF.
-	 *
-	 * TODO:
-	 *   Replace with popFront and front.
+	 *   @p loc updated to the current position if not at EOF.
 	 *
 	 * Throws:
 	 *   UtfException if the source is not valid utf8.
@@ -190,8 +188,8 @@ public:
 	fn next() dchar
 	{
 		if (mChar == '\n') {
-			location.line++;
-			location.column = 0;
+			loc.line++;
+			loc.column = 0;
 		}
 
 		mLastIndex = mNextIndex;
@@ -203,16 +201,13 @@ public:
 			return mChar;
 		}
 
-		location.column++;
+		loc.column++;
 
 		return mChar;
 	}
 
 	/*!
 	 * Returns the current utf8 char.
-	 *
-	 * TODO:
-	 *   Rename to front.
 	 *
 	 * Side-effects:
 	 *   None.
@@ -291,7 +286,7 @@ public:
 		if (src.source !is this.source) {
 			throw panic("attempted to sync different sources");
 		}
-		this.location = src.location;
+		this.loc = src.loc;
 		this.mNextIndex = src.mNextIndex;
 		this.mLastIndex = src.mLastIndex;
 		this.mChar = src.mChar;

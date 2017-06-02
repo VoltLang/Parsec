@@ -64,6 +64,7 @@ public:
 	//! The type name as typed -- string vs immutable(char)[].
 	string glossedName;
 
+
 protected:
 	this(NodeType nt) { super(nt); }
 
@@ -110,7 +111,8 @@ protected:
 class PrimitiveType : Type
 {
 public:
-	enum Kind {
+	enum Kind
+	{
 		Invalid,
 		Void = TokenType.Void,
 		Bool = TokenType.Bool,
@@ -131,6 +133,7 @@ public:
 		Double = TokenType.Double,
 		Real = TokenType.Real,
 	}
+
 
 public:
 	Kind type;
@@ -164,6 +167,7 @@ public:
 	Type type;  //!< What Type this refers to. Filled in after parsing sometime.
 	QualifiedName id; //!< The name of the Type. Filled in the initial parsing.
 
+
 public:
 	this() { super(NodeType.TypeReference); }
 
@@ -184,6 +188,7 @@ class TypeOf : Type
 {
 public:
 	Exp exp;  //!< The expression to get the type of.
+
 
 public:
 	this() { super(NodeType.TypeOf); }
@@ -298,6 +303,7 @@ public:
 	Type base;
 	Exp child;
 
+
 public:
 	this() { super(NodeType.AmbiguousArrayType); }
 	this(AmbiguousArrayType old)
@@ -382,7 +388,7 @@ public:
 	bool isProperty;
 	bool homogenousVariadic;
 	bool forceLabel;
-	Class typeInfo;  //< When the backend needs a TypeInfo for varargs and such.
+	Class typeInfo;  //!< When the backend needs a TypeInfo for varargs and such.
 	// Hi there. Thinking of adding a new field? Add it to the copy constructor, below.
 
 
@@ -436,12 +442,13 @@ public:
 	FunctionSet set;
 	bool isFromCreateDelegate;  //!< For use in typer.
 
+
 public:
 	this() { super(NodeType.FunctionSetType); }
 	this(FunctionSet set)
 	{
 		this();
-		location = set.location;
+		loc = set.loc;
 		this.set = set;
 	}
 
@@ -548,7 +555,8 @@ public:
 class StorageType : Type
 {
 public:
-	enum Kind {
+	enum Kind
+	{
 		Invalid,
 		Auto = TokenType.Auto,
 		Const = TokenType.Const,
@@ -570,6 +578,7 @@ public:
 public:
 	Kind type;
 	Type base;  // Optional.
+
 
 public:
 	this() { super(NodeType.StorageType); }
@@ -594,6 +603,7 @@ class AutoType : Type
 public:
 	Type explicitType;  //!< The explicit type to replace this with.
 	bool isForeachRef;
+
 
 public:
 	this() { super(NodeType.AutoType); }

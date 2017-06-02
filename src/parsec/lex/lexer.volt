@@ -9,9 +9,9 @@ import watt.text.format : format;
 import watt.text.string : indexOf;
 import watt.conv : toInt;
 import watt.text.utf : encode;
+import watt.text.vdoc : cleanComment;
 
 import parsec.errors;
-import parsec.util.string : cleanComment;
 import parsec.lex.location : Location;
 import parsec.lex.source : Source, Mark;
 import parsec.lex.token : Token, TokenType, identifierType;
@@ -65,7 +65,7 @@ bool match(TokenWriter tw, dchar c)
 {
 	dchar cur = tw.source.current;
 	if (cur != c) {
-		tw.errors ~= new LexerStringError(LexerError.Kind.Expected, tw.source.location, cur, encode(c));
+		tw.errors ~= new LexerStringError(LexerError.Kind.Expected, tw.source.loc, cur, encode(c));
 		return false;
 	}
 
@@ -108,7 +108,7 @@ bool matchIf(TokenWriter tw, dchar c)
 LexStatus lexFailed(TokenWriter tw, string s)
 {
 	tw.errors ~= new LexerStringError(LexerError.Kind.LexFailed,
-	                                  tw.source.location, tw.source.current, s);
+	                                  tw.source.loc, tw.source.current, s);
 	return Failed;
 }
 
@@ -123,11 +123,11 @@ LexStatus lexExpected(TokenWriter tw, Location loc, string s)
 }
 
 /*!
- * Calls lexExpected with tw.source.location.
+ * Calls lexExpected with tw.source.loc.
  */
 LexStatus lexExpected(TokenWriter tw, string s)
 {
-	return lexExpected(tw, tw.source.location, s);
+	return lexExpected(tw, tw.source.loc, s);
 }
 
 LexStatus lexUnsupported(TokenWriter tw, Location loc, string s)
@@ -138,19 +138,19 @@ LexStatus lexUnsupported(TokenWriter tw, Location loc, string s)
 
 LexStatus lexUnsupported(TokenWriter tw, string s)
 {
-	return lexUnsupported(tw, tw.source.location, s);
+	return lexUnsupported(tw, tw.source.loc, s);
 }
 
 LexStatus lexPanic(TokenWriter tw, Location loc, string msg)
 {
-	tw.errors ~= new LexerPanicError(loc, tw.source.current, panic(loc, msg));
+	tw.errors ~= new LexerPanicError(ref loc, tw.source.current, panic(ref loc, msg));
 	return Failed;
 }
 
 Token currentLocationToken(TokenWriter tw)
 {
-	auto t = new Token();
-	t.location = tw.source.location;
+	Token t;
+	t.loc = tw.source.loc;
 	return t;
 }
 
@@ -244,10 +244,10 @@ NextLex nextLex(TokenWriter tw)
 
 void addIfDocComment(TokenWriter tw, Token commentToken, string s, string docsignifier)
 {
-	auto closeIndex = s.indexOf("@}");
-	if ((s.length <= 2 || s[0 .. 2] != docsignifier) && closeIndex < 0) {
+	if ((tw.noDoc || s.length <= 2 || s[0 .. 2] != docsignifier)) {
 		return;
 	}
+	auto closeIndex = s.indexOf("@}");
 	commentToken.type = TokenType.DocComment;
 	commentToken.value = closeIndex < 0 ? cleanComment(s, out commentToken.isBackwardsComment) : "@}";
 	tw.addToken(commentToken);
@@ -259,7 +259,7 @@ LexStatus skipLineComment(TokenWriter tw)
 	auto mark = tw.source.save();
 
 	if (!match(tw, '/')) {
-		return lexPanic(tw, tw.source.location, "expected '/'");
+		return lexPanic(tw, tw.source.loc, "expected '/'");
 	}
 	tw.source.skipEndOfLine();
 
@@ -279,7 +279,7 @@ LexStatus skipBlockComment(TokenWriter tw)
 		}
 		if (matchIf(tw, '/')) {
 			if (tw.source.current == '*') {
-				warning(tw.source.location, "'/*' inside of block comment.");
+				warning(tw.source.loc, "'/*' inside of block comment.");
 			}
 		} else if (matchIf(tw, '*')) {
 			if (matchIf(tw, '/')) {
@@ -350,12 +350,12 @@ LexStatus lexIdentifier(TokenWriter tw)
 
 	identToken.value = tw.source.sliceFrom(m);
 	if (identToken.value.length == 0) {
-		return lexPanic(tw, identToken.location, "empty identifier string.");
+		return lexPanic(tw, identToken.loc, "empty identifier string.");
 	}
 	if (identToken.value[0] == '@') {
 		auto i = identifierType(identToken.value);
 		if (i == TokenType.Identifier) {
-			return lexExpected(tw, identToken.location, "@attribute");
+			return lexExpected(tw, identToken.loc, "@attribute");
 		}
 	}
 
@@ -742,7 +742,7 @@ LexStatus lexCharacter(TokenWriter tw)
 	}
 	while (tw.source.current != '\'') {
 		if (tw.source.eof) {
-			return lexExpected(tw, token.location, "`'`");
+			return lexExpected(tw, token.loc, "`'`");
 		}
 		if (matchIf(tw, '\\')) {
 			tw.source.next();
@@ -757,7 +757,7 @@ LexStatus lexCharacter(TokenWriter tw)
 	token.type = TokenType.CharacterLiteral;
 	token.value = tw.source.sliceFrom(mark);
 	if (token.value.length > 4 && token.value[0 .. 3] == "'\\0") {
-		return lexUnsupported(tw, token.location, "octal char literals");
+		return lexUnsupported(tw, token.loc, "octal char literals");
 	}
 	tw.addToken(token);
 	return Succeeded;
@@ -794,7 +794,7 @@ LexStatus lexString(TokenWriter tw)
 	}
 	while (tw.source.current != terminator) {
 		if (tw.source.eof) {
-			return lexExpected(tw, token.location, "string literal terminator");
+			return lexExpected(tw, token.loc, "string literal terminator");
 		}
 		if (!raw && matchIf(tw, '\\')) {
 			tw.source.next();
@@ -882,7 +882,7 @@ LexStatus lexQString(TokenWriter tw)
 	int nest = 1;
 	while (true) {
 		if (tw.source.eof) {
-			return lexExpected(tw, token.location, "string literal terminator");
+			return lexExpected(tw, token.loc, "string literal terminator");
 		}
 		if (matchIf(tw, opendelimiter)) {
 			nest++;
@@ -906,7 +906,7 @@ LexStatus lexQString(TokenWriter tw)
 			while (look - 1 < identdelim.length) {
 				dchar c = tw.source.lookahead(look, out leof);
 				if (leof) {
-					return lexExpected(tw, token.location, "string literal terminator");
+					return lexExpected(tw, token.loc, "string literal terminator");
 				}
 				if (c != identdelim[look - 1]) {
 					restart = true;
@@ -976,10 +976,10 @@ LexStatus lexTokenString(TokenWriter tw)
  * Consume characters from the source from the characters array until you can't.
  * Returns: the number of characters consumed, not counting underscores.
  */
-size_t consume(Source src, const(dchar)[] characters...)
+size_t consume(Source src, scope const(dchar)[] characters...)
 {
 	size_t consumed;
-	static bool isIn(const(dchar)[] chars, dchar arg) {
+	static bool isIn(scope const(dchar)[] chars, dchar arg) {
 		foreach (dchar c; chars) {
 			if (c == arg)
 				return true;
@@ -994,28 +994,6 @@ size_t consume(Source src, const(dchar)[] characters...)
 }
 
 /*!
- * Returns a string that is s, with all '_' removed.
- *    "134_hello" => "134hello"
- *    "_" => ""
- */
-string removeUnderscores(string s)
-{
-	auto output = new char[](s.length);
-	size_t i;
-	foreach (char c; s) {
-		if (c == '_') {
-			continue;
-		}
-		output[i++] = c;
-	}
-	version (Volt) {
-		return i == s.length ? s : cast(string)new output[0 .. i];
-	} else {
-		return i == s.length ? s : output[0 .. i].idup;
-	}
-}
-
-/*!
  * Lex an integer literal and add the resulting token to tw.
  * If it detects the number is floating point, it will call lexReal directly.
  */
@@ -1026,6 +1004,7 @@ LexStatus lexNumber(TokenWriter tw)
 	auto mark = src.save();
 	bool tmp;
 
+	bool hex;
 	if (src.current == '0') {
 		src.next();
 		if (src.current == 'b' || src.current == 'B') {
@@ -1033,25 +1012,26 @@ LexStatus lexNumber(TokenWriter tw)
 			src.next();
 			auto consumed = consume(src, '0', '1', '_');
 			if (consumed == 0) {
-				return lexExpected(tw, src.location, "binary digit");
+				return lexExpected(tw, src.loc, "binary digit");
 			}
 		} else if (src.current == 'x' || src.current == 'X') {
 			// Hexadecimal literal.
 			src.next();
+			hex = true;
 			if (src.current == '.' || src.current == 'p' || src.current == 'P') return lexReal(tw);
 			auto consumed = consume(src, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 			                             'a', 'b', 'c', 'd', 'e', 'f',
 			                             'A', 'B', 'C', 'D', 'E', 'F', '_');
 			if ((src.current == '.' && src.lookahead(1, out tmp) != '.') || src.current == 'p' || src.current == 'P') return lexReal(tw);
 			if (consumed == 0) {
-				return lexExpected(tw, src.location, "hexadecimal digit");
+				return lexExpected(tw, src.loc, "hexadecimal digit");
 			}
 		} else if (src.current == '1' || src.current == '2' || src.current == '3' || src.current == '4' || src.current == '5' ||
 				src.current == '6' || src.current == '7') {
 			/* This used to be an octal literal, which are gone.
 			 * DMD treats this as an error, so we do too.
 			 */
-			return lexUnsupported(tw, src.location, "octal literals");
+			return lexUnsupported(tw, src.loc, "octal literals");
 		} else if (src.current == 'f' || src.current == 'F' || (src.current == '.' && src.lookahead(1, out tmp) != '.')) {
 			return lexReal(tw);
 		}
@@ -1062,7 +1042,7 @@ LexStatus lexNumber(TokenWriter tw)
 		consume(src, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '_');
 		if (src.current == '.' && src.lookahead(1, out tmp) != '.') return lexReal(tw);
 	} else {
-		return lexExpected(tw, src.location, "integer literal");
+		return lexExpected(tw, src.loc, "integer literal");
 	}
 
 	if (src.current == 'f' || src.current == 'F' || src.current == 'e' || src.current == 'E') {
@@ -1070,7 +1050,14 @@ LexStatus lexNumber(TokenWriter tw)
 	}
 
 	tw.source.sync(src);
-	if (tw.source.current == 'U' || tw.source.current == 'u') {
+	bool dummy;
+	auto _1 = tw.source.current;
+	auto _2 = tw.source.lookahead(1, out dummy);
+	if ((_1 == 'i' || _1 == 'u') && isDigit(_2)) {
+		tw.source.next();  // i/u
+		if (isDigit(tw.source.current)) tw.source.next();
+		if (isDigit(tw.source.current)) tw.source.next();
+	} else if (tw.source.current == 'U' || tw.source.current == 'u') {
 		tw.source.next();
 		if (tw.source.current == 'L') tw.source.next();
 	} else if (tw.source.current == 'L') {
@@ -1082,7 +1069,6 @@ LexStatus lexNumber(TokenWriter tw)
 
 	token.type = TokenType.IntegerLiteral;
 	token.value = tw.source.sliceFrom(mark);
-	token.value = removeUnderscores(token.value);
 	tw.addToken(token);
 
 	return Succeeded;
@@ -1099,7 +1085,6 @@ LexStatus lexReal(TokenWriter tw)
 	{
 		token.type = TokenType.FloatLiteral;
 		token.value = tw.source.sliceFrom(mark);
-		token.value = removeUnderscores(token.value);
 		tw.addToken(token);
 		return Succeeded;
 	}
@@ -1200,12 +1185,17 @@ LexStatus lexHashLine(TokenWriter tw)
 
 	if (match(tw, "run")) {
 		if (!isWhite(tw.source.current)) {
-			return lexExpected(tw, token.location, "#run");
+			return lexExpected(tw, token.loc, "#run");
 		}
 
 		token.type = TokenType.HashRun;
 		token.value = "#run";
 		tw.addToken(token);
+		return Succeeded;
+	}
+
+	if (match(tw, "nodoc")) {
+		tw.noDoc = true;
 		return Succeeded;
 	}
 
@@ -1220,7 +1210,7 @@ LexStatus lexHashLine(TokenWriter tw)
 	}
 	Token Int = tw.lastAdded;
 	if (Int.type != TokenType.IntegerLiteral) {
-		return lexExpected(tw, Int.location, "integer literal");
+		return lexExpected(tw, Int.loc, "integer literal");
 	}
 	int lineNumber = toInt(Int.value);
 	tw.pop();

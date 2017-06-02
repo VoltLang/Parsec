@@ -86,6 +86,18 @@ public:
 		Global,  //!< Stored in the global data segment.
 	}
 
+	static string storageToString(Storage s)
+	{
+		final switch (s) with (Storage) {
+		case Invalid:  return "invalid";
+		case Field:    return "field";
+		case Function: return "function";
+		case Nested:   return "nested";
+		case Local:    return "local";
+		case Global:   return "global";
+		}
+	}
+
 public:
 	//! Has the extyper checked this variable.
 	bool isResolved;
@@ -324,7 +336,6 @@ public:
 
 	string name;  //!< Pre mangling.
 	string mangledName;
-	string suffix;  //!< Disambiguating nested function's mangledNames in different scopes.
 
 	/*!
 	 * For use with the out contract.
@@ -368,6 +379,7 @@ public:
 	bool isOverridingInterface;
 
 	bool isAbstract;
+	bool isFinal;
 
 	/*!
 	 * Makes the ExTyper automatically set the correct return type
@@ -384,7 +396,8 @@ public:
 	bool isLoweredScopeSuccess;
 	//! @}
 
-	TemplateInstance templateInstance;  //< Optional. Non-null if this is a template instantiation.
+	TemplateInstance templateInstance;  //!< Optional. Non-null if this is a template instantiation.
+
 
 public:
 	this() { super(NodeType.Function); }
@@ -413,7 +426,6 @@ public:
 		}
 		this.name = old.name;
 		this.mangledName = old.mangledName;
-		this.suffix = old.suffix;
 		this.outParameter = old.outParameter;
 		this.inContract = old.inContract;
 		this.outContract = old.outContract;
@@ -428,6 +440,7 @@ public:
 		this.isMarkedOverride = old.isMarkedOverride;
 		this.isOverridingInterface = old.isOverridingInterface;
 		this.isAbstract = old.isAbstract;
+		this.isFinal = old.isFinal;
 		this.isAutoReturn = old.isAutoReturn;
 		this.isLoweredScopeExit = old.isLoweredScopeExit;
 		this.isLoweredScopeFailure = old.isLoweredScopeFailure;
@@ -445,6 +458,7 @@ class EnumDeclaration : Declaration
 	EnumDeclaration prevEnum;
 	bool resolved;
 	Access access;
+	bool isStandalone;  // enum A = <blah> style declaration.
 
 public:
 	this() { super(NodeType.EnumDeclaration); }
@@ -458,6 +472,7 @@ public:
 		this.name = old.name;
 		this.prevEnum = old.prevEnum;
 		this.resolved = old.resolved;
+		this.isStandalone = old.isStandalone;
 	}
 }
 
@@ -493,7 +508,7 @@ public:
 	@property FunctionSetType type()
 	{
 		auto t = new FunctionSetType();
-		t.location = location;
+		t.loc = loc;
 		t.set = this;
 		return t;
 	}

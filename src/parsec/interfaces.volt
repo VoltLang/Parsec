@@ -28,6 +28,18 @@ enum Platform
 	Metal,
 }
 
+string platformToString(Platform platform)
+{
+	final switch (platform) with (Platform) {
+	case Unknown: return "unknown";
+	case MinGW: return "mingw";
+	case MSVC:  return "msvc";
+	case Linux: return "linux";
+	case OSX:   return "osx";
+	case Metal: return "metal";
+	}
+}
+
 /*!
  * Each of these listed architectures corresponds
  * to a Version identifier.
@@ -39,6 +51,15 @@ enum Arch
 	X86_64,
 }
 
+string archToString(Arch arch)
+{
+	final switch (arch) with (Arch) {
+	case X86: return "x86";
+	case X86_64: return "x86_64";
+	case Unknown: return "Unknown";
+	}
+}
+
 /*!
  * Holds information about the target that we are compiling to.
  */
@@ -46,22 +67,6 @@ class TargetInfo
 {
 	Arch arch;
 	Platform platform;
-
-	this()
-	{
-		version (X86) {
-			arch = Arch.X86;
-		} else {
-			arch = Arch.X86_64;
-		}
-		version (Linux) {
-			platform = Platform.Linux;
-		} else version (OSX) {
-			platform = Platform.OSX;
-		} else version (MSVC) {
-			platform = Platform.MSVC;
-		}
-	}
 
 	bool isP64;
 	size_t ptrSize;
@@ -119,6 +124,13 @@ public:
 		// Misc
 		"V_P32",
 		"V_P64",
+		// C runtime flags
+		"CRuntime_All",
+		"CRuntime_Any",
+		"CRuntime_None",
+		"CRuntime_Glibc",
+		"CRuntime_Bionic",
+		"CRuntime_Microsoft",
 	];
 
 private:
@@ -225,7 +237,7 @@ public:
 	abstract ir.Module loadModule(ir.QualifiedName name);
 
 	//! Load a filename from the string import paths.
-	abstract string stringImport(Location loc, string filename);
+	abstract string stringImport(ref in Location loc, string filename);
 
 	//! Get the modules given on the command line.
 	abstract ir.Module[] getCommandLineModules();
@@ -380,16 +392,16 @@ public:
 	ir.Function aaGetLength;         // vrt_aa_get_length
 	ir.Function aaInsertPrimitive;   // vrt_aa_insert_primitive
 	ir.Function aaInsertArray;       // vrt_aa_insert_array
+	ir.Function aaInsertPtr;         // vrt_aa_insert_ptr
 	ir.Function aaDeletePrimitive;   // vrt_aa_delete_primitive
 	ir.Function aaDeleteArray;       // vrt_aa_delete_array
+	ir.Function aaDeletePtr;         // vrt_aa_delete_ptr
 	ir.Function aaInPrimitive;       // vrt_aa_in_primitive
 	ir.Function aaInArray;           // vrt_aa_in_array
+	ir.Function aaInPtr;             // vrt_aa_in_ptr
 	ir.Function aaInBinopPrimitive;  // vrt_aa_in_binop_primitive
 	ir.Function aaInBinopArray;      // vrt_aa_in_binop_array
-	ir.Function aaGetPP;             // vrt_aa_get_pp
-	ir.Function aaGetAA;             // vrt_aa_get_aa
-	ir.Function aaGetPA;             // vrt_aa_get_pa
-	ir.Function aaGetAP;             // vrt_aa_get_ap
+	ir.Function aaInBinopPtr;        // vrt_aa_in_binop_ptr
 
 	// core.rt.misc
 	ir.Struct moduleInfo;

@@ -23,12 +23,11 @@ public:
 	bool warningsEnabled; //!< The -w argument.
 	bool noBackend; //!< The -S argument.
 	bool noLink; //!< The -c argument
-	bool emitBitcode; //!< The --emit-bitcode argument.
+	bool emitLLVM; //!< The --emit-llvm argument.
 	bool noCatch; //!< The --no-catch argument.
 	bool noStdLib; //!< The --no-stdlib argument.
 	bool removeConditionalsOnly; //!< The -E argument.
 	bool simpleTrace; //!< The --simple-trace argument.
-	bool writeDocs; //!< The --doc argument.
 	bool internalD; //!< The --internal-d argument;
 	bool internalDiff; //!< The --internal-diff argument.
 	bool internalDebug; //!< The --internal-dbg argument.
@@ -45,16 +44,22 @@ public:
 	string archStr; //!< Derived from arch.
 
 	string cc; //!< The --cc argument.
-	string[] xcc; //!< Arguments to cc, the --Xcc argument.
+	string[] xcc; //!< Arguments to cc, the --Xcc argument(s).
 
 	string ld; //!< The --ld argument.
-	string[] xld; //!< The --Xld argument.
+	string[] xld; //!< The --Xld argument(s).
 
 	string link; //!< The --link argument.
-	string[] xlink; //!< The --Xlink argument.
+	string[] xlink; //!< The --Xlink argument(s).
+
+	string clang; //!< The --clang argument.
+	string[] xclang; //!< The --Xclang argument(s).
+
+	string llvmAr; //!< The --llvm-ar argument.
+	string[] xllvmAr; //!< The --Xllvm-ar argument(s).
 
 	string linker; //!< The --linker argument
-	string[] xlinker; //!< Arguments to the linker, the -Xlinker argument.
+	string[] xlinker; //!< Arguments to the linker, the -Xlinker argument(s).
 
 	string depFile;
 	string outputFile;
@@ -72,8 +77,6 @@ public:
 
 	string[] stringImportPaths; //!< The -J arguments.
 
-	string docDir; //!< The --doc-dir argument.
-	string docOutput; //!< The -do argument.
 	string jsonOutput; //!< The -jo argument.
 
 	string perfOutput; //!< The --perf-output argument.
@@ -175,13 +178,15 @@ public:
 		MissingDeps,     //!< --missing
 		ImportAsSrc,     //!< --import-as-src
 
-		Debug,
+		Debug,           //!< --debug
+		Release,         //!< --release
 		DebugSimpleTrace,
 
 		Dep,             //!< --dep
 		Output,
 
-		EmitBitcode,     //!< --emit-bitcode
+		EmitLLVM,        //!< --emit-llvm
+		EmitBitcode,     //!< --emit-bitcode (depricated)
 
 		NoLink,
 
@@ -194,6 +199,12 @@ public:
 		Link,
 		LinkArg,
 
+		Clang,
+		ClangArg,
+
+		LLVMAr,
+		LLVMArArg,
+
 		Linker,
 		LinkerArg,
 
@@ -205,11 +216,6 @@ public:
 
 		StringImportPath,
 
-		DocDo,
-		DocDir,
-		DocOutput,
-
-		JSONDo,
 		JSONOutput,
 
 		PerfOutput,
@@ -218,7 +224,7 @@ public:
 		InternalDiff,
 		InternalPerf,
 		InternalDebug,
-		InternalNoCatch, //!< --no-catch
+		InternalNoCatch, //< --no-catch
 	}
 
 	string arg;
@@ -305,6 +311,9 @@ void filterArgs(Arg[] args, ref string[] files, VersionSet ver, Settings setting
 		case Debug:
 			ver.debugEnabled = true;
 			break;
+		case Release:
+			ver.debugEnabled = false;
+			break;
 		case DebugSimpleTrace:
 			settings.simpleTrace = true;
 			break;
@@ -316,8 +325,12 @@ void filterArgs(Arg[] args, ref string[] files, VersionSet ver, Settings setting
 			settings.outputFile = arg.arg;
 			break;
 
+		case EmitLLVM:
+			settings.emitLLVM = true;
+			break;
 		case EmitBitcode:
-			settings.emitBitcode = true;
+			settings.noLink = true;
+			settings.emitLLVM = true;
 			break;
 
 		case NoLink:
@@ -342,6 +355,18 @@ void filterArgs(Arg[] args, ref string[] files, VersionSet ver, Settings setting
 		case LinkArg:
 			settings.xlink ~= arg.arg;
 			break;
+		case Clang:
+			settings.clang = arg.arg;
+			break;
+		case ClangArg:
+			settings.xclang ~= arg.arg;
+			break;
+		case LLVMAr:
+			settings.llvmAr = arg.arg;
+			break;
+		case LLVMArArg:
+			settings.xllvmAr ~= arg.arg;
+			break;
 		case Linker:
 			settings.linker = arg.arg;
 			break;
@@ -363,22 +388,8 @@ void filterArgs(Arg[] args, ref string[] files, VersionSet ver, Settings setting
 		case StringImportPath:
 			settings.stringImportPaths ~= arg.arg;
 			break;
-		case JSONDo:
-			settings.jsonOutput = "voltoutput.json";
-			break;
 		case JSONOutput:
 			settings.jsonOutput = arg.arg;
-			break;
-		case DocDo:
-			settings.writeDocs = true;
-			break;
-		case DocDir:
-			settings.writeDocs = true;
-			settings.docDir = arg.arg;
-			break;
-		case DocOutput:
-			settings.writeDocs = true;
-			settings.docOutput = arg.arg;
 			break;
 		case PerfOutput:
 			settings.perfOutput = arg.arg;

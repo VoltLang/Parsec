@@ -23,10 +23,17 @@ import gatherer = parsec.postparse.gatherer;
 class ImportResolver : ScopeManager, Pass
 {
 private:
+	LanguagePass lp;
 	ir.Module mModule;
 
 
 public:
+	this(LanguagePass lp)
+	{
+		this.lp = lp;
+	}
+
+
 	/*
 	 *
 	 * Pass functions.
@@ -47,11 +54,6 @@ public:
 	}
 
 
-	ir.Module getModule(name: string)
-	{
-		return null;  // TODO
-	}
-
 	/*
 	 *
 	 * Visitor and our functions.
@@ -71,11 +73,12 @@ public:
 			return Continue;
 		}
 
-		auto mod = getModule(i.name.toString());
-		if (mod is null) {
+		//auto mod = lp.getModule(i.name);
+		if (/*mod*/lp is null) {
 			//throw makeCannotImport(i, i);
 			return Continue;
 		}
+		/+
 		if (mod.isAnonymous) {
 			//throw makeCannotImportAnonymous(i, i);
 			return Continue;
@@ -92,6 +95,7 @@ public:
 			// static import a; OR import a;
 			handleRegularAndStatic(mod, i);
 		}
+		+/
 
 		return ContinueParent;
 	}
@@ -108,7 +112,8 @@ public:
 		gatherer.addScope(mod);
 		assert(mod.myScope !is null);
 
-		current.addScope(i, mod.myScope, i.bind.value);
+		auto store = current.addScope(i, mod.myScope, i.bind.value);
+		store.importBindAccess = i.access;
 	}
 
 	/*!
@@ -130,9 +135,9 @@ public:
 			ir.Alias a;
 
 			if (_alias[1] is null) {
-				a = buildAlias(_alias[0].location, _alias[0].value, _alias[0].value);
+				a = buildAlias(ref _alias[0].loc, _alias[0].value, _alias[0].value);
 			} else {
-				a = buildAliasSmart(_alias[0].location, _alias[0].value, _alias[1]);
+				a = buildAliasSmart(ref _alias[0].loc, _alias[0].value, _alias[1]);
 			}
 
 			// Setup where we should look.

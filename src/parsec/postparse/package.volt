@@ -19,7 +19,7 @@ global this()
 	passes ~= new ScopeReplacer();
 	passes ~= new AttribRemoval(target);
 	passes ~= new Gatherer(true);
-	passes ~= new ImportResolver();
+	passes ~= new ImportResolver(null);
 }
 
 

@@ -53,7 +53,7 @@ public:
 
 	override Status enter(ir.Struct s)
 	{
-		checkPreScope(s.location, s.myScope);
+		checkPreScope(s.loc, s.myScope);
 		current = s.myScope;
 		return Continue;
 	}
@@ -74,7 +74,7 @@ public:
 
 	override Status enter(ir.Union u)
 	{
-		checkPreScope(u.location, u.myScope);
+		checkPreScope(u.loc, u.myScope);
 		current = u.myScope;
 		return Continue;
 	}
@@ -95,7 +95,7 @@ public:
 
 	override Status enter(ir.Class c)
 	{
-		checkPreScope(c.location, c.myScope);
+		checkPreScope(c.loc, c.myScope);
 		current = c.myScope;
 		return Continue;
 	}
@@ -116,7 +116,7 @@ public:
 
 	override Status enter(ir._Interface i)
 	{
-		checkPreScope(i.location, i.myScope);
+		checkPreScope(i.loc, i.myScope);
 		current = i.myScope;
 		return Continue;
 	}
@@ -137,7 +137,7 @@ public:
 
 	override Status enter(ir.Function func)
 	{
-		checkPreScope(func.location, func.myScope);
+		checkPreScope(func.loc, func.myScope);
 		functionStack ~= func;
 		current = func.myScope;
 		return Continue;
@@ -164,7 +164,7 @@ public:
 
 	override Status enter(ir.BlockStatement bs)
 	{
-		checkPreScope(bs.location, bs.myScope);
+		checkPreScope(bs.loc, bs.myScope);
 		current = bs.myScope;
 		return Continue;
 	}
@@ -185,7 +185,7 @@ public:
 
 	override Status enter(ir.Enum e)
 	{
-		checkPreScope(e.location, e.myScope);
+		checkPreScope(e.loc, e.myScope);
 		current = e.myScope;
 		return Continue;
 	}

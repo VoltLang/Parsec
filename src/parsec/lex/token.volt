@@ -17,7 +17,7 @@ import parsec.lex.location;
  * another are implicitly concatenated. I warn you of this out of experience.
  */
 enum immutable(string)[] _tokenToString = [
-"none", "BEGIN", "END", "DocComment", "DocCommentBackwards",
+"none", "BEGIN", "END", "DocComment",
 "identifier", "string literal", "character literal",
 "integer literal", "float literal", "abstract", "alias", "align",
 "asm", "assert", "auto", "body", "bool", "break", "i8", "case",
@@ -67,7 +67,6 @@ enum TokenType
 	Begin,
 	End,
 	DocComment,
-	DocCommentBackwards,
 
 	// Literals
 	Identifier,
@@ -179,7 +178,18 @@ fn tokenToString(token: TokenType) string
 	return _tokenToString[token];
 }
 
-fn isPrimitiveTypeToken(token: TokenType) bool
+
+bool isStorageTypeToken(TokenType token)
+{
+	switch (token) {
+	case TokenType.Immutable, TokenType.Const:
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool isPrimitiveTypeToken(TokenType token)
 {
 	switch (token) {
 	case TokenType.Bool, TokenType.Ubyte, TokenType.Byte,
@@ -200,7 +210,7 @@ fn isPrimitiveTypeToken(token: TokenType) bool
 /*!
  * Holds the type, the actual string and location within the source file.
  */
-class Token
+struct Token
 {
 	loc: Location;
 	alias location = loc;
