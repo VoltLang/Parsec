@@ -1,7 +1,7 @@
 // Copyright © 2010, Bernard Helyer.  All rights reserved.
 // Copyright © 2012, Jakob Bornecrantz.  All rights reserved.
 // See copyright notice in src/volt/license.d (BOOST ver. 1.0).
-module volt.token.source;
+module parsec.lex.source;
 
 import watt.io.file : read;
 import watt.text.utf : decode, validate;

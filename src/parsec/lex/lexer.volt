@@ -1,6 +1,6 @@
 // Copyright © 2010-2017, Bernard Helyer.  All rights reserved.
 // See copyright notice in src/volt/license.d (BOOST ver. 1.0).
-module parsec.token.lexer;
+module parsec.lex.lexer;
 
 import core.c.time : time, localtime;
 
