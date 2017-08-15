@@ -261,7 +261,6 @@ protected:
 			// Not a Condition at all.
 			return false;
 		}
-		return false;
 	}
 
 	/*!
