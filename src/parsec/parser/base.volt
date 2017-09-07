@@ -550,7 +550,7 @@ public:
 	void saveTokens()
 	{
 		mSavingTokens = true;
-		mSavedTokens = [];
+		mSavedTokens = null;
 	}
 
 	Token[] doneSavingTokens()
@@ -562,7 +562,7 @@ public:
 
 	void resetErrors()
 	{
-		parserErrors = [];
+		parserErrors = null;
 	}
 
 	final void pushCommentLevel()
