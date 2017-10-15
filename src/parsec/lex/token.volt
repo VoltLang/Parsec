@@ -16,7 +16,7 @@ import parsec.lex.location;
  * to keep commas between elements -- two string literals straight after one
  * another are implicitly concatenated. I warn you of this out of experience.
  */
-enum immutable(string)[] _tokenToString = [
+enum string[] _tokenToString = [
 "none", "BEGIN", "END", "DocComment",
 "identifier", "string literal", "character literal",
 "integer literal", "float literal", "abstract", "alias", "align",
