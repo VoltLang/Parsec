@@ -2,7 +2,7 @@
 
 Parsec is no longer being worked on, it has been replaced with
 [volta.lib](https://github.com/VoltLang/Volta). Which is part
-of the official volta parser.
+of the official Volt parser.
 
 ### Old info
 
